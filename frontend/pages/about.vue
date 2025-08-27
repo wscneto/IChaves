@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50 px-6 py-12">
     <div class="max-w-5xl mx-auto">
+      <BackButton />
       <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">
         Sobre o Projeto
       </h1>

@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Search Bar -->
     <div class="p-4">
       <input
         type="text"
@@ -9,6 +10,7 @@
       />
     </div>
 
+    <!-- Classroom List -->
     <main class="flex-1 p-4">
       <div class="flex flex-col gap-5">
         <NuxtLink
@@ -18,14 +20,35 @@
           class="block"
         >
           <div
-            class="p-4 bg-white rounded-2xl shadow hover:shadow-lg transition"
+            class="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition flex items-center justify-between"
           >
-            <div class="flex items-center justify-between">
+            <div class="flex items-center gap-10">
               <h2 class="text-lg font-semibold text-gray-800">
                 {{ room.name }}
               </h2>
               <StatusBadge :status="room.status" />
             </div>
+
+            <button
+              @click.stop="handleAction(room)"
+              :disabled="room.status === 'unknown'"
+              :class="[
+                'ml-4 px-4 py-2 rounded-lg font-medium transition',
+                room.status === 'available'
+                  ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
+                  : room.status === 'in_use'
+                  ? 'bg-yellow-500 text-white hover:bg-yellow-600 cursor-pointer'
+                  : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+              ]"
+            >
+              {{
+                room.status === 'available'
+                  ? 'Pegar chave'
+                  : room.status === 'in_use'
+                  ? 'Trocar chave'
+                  : 'Indisponível'
+              }}
+            </button>
           </div>
         </NuxtLink>
       </div>
@@ -52,4 +75,15 @@ const filteredClassrooms = computed(() =>
     room.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 )
+
+const handleAction = (room: { id: number; name: string; status: string }) => {
+  if (room.status === 'available') {
+    alert(`Você pegou a chave da sala ${room.name}!`)
+    room.status = 'in_use'
+  } else if (room.status === 'in_use') {
+    alert(`Você trocou a chave da sala ${room.name}.`)
+  } else {
+    alert(`A sala ${room.name} está indisponível.`)
+  }
+}
 </script>
