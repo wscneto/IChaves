@@ -1,23 +1,5 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
-    <header class="flex items-center justify-between px-4 py-3 bg-white shadow-md">
-      <NuxtLink to="/">
-        <h1 class="text-xl font-bold text-green-700"><span class="text-blue-600">IC</span>haves</h1>
-      </NuxtLink>
-      <div class="flex items-center space-x-3">
-        <NuxtLink to="/user" class="flex items-center space-x-3">
-          <span class="hidden sm:block text-gray-700 font-medium">
-            Walter Neto
-          </span>
-          <img
-            src="https://ui-avatars.com/api/?name=Walter+Neto"
-            alt="User avatar"
-            class="w-8 h-8 rounded-full border border-gray-300"
-          />
-        </NuxtLink>
-      </div>
-    </header>
-
     <div class="p-4">
       <input
         type="text"
@@ -28,7 +10,7 @@
     </div>
 
     <main class="flex-1 p-4">
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="flex flex-col gap-5">
         <NuxtLink
           v-for="room in filteredClassrooms"
           :key="room.id"
