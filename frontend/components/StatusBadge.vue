@@ -12,33 +12,36 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const { status } = defineProps<{
+const props = defineProps<{
   status: string
 }>()
 
-const normalizedStatus = computed(() => {
-  return status === 'available' || status === 'in_use' ? status : 'blocked'
-})
-
+// O statusLabel agora lida com o novo status 'reserved'
 const statusLabel = computed(() => {
-  switch (normalizedStatus.value) {
+  switch (props.status) {
     case 'available':
       return 'Disponível'
     case 'in_use':
       return 'Em uso'
+    case 'reserved': // Novo status
+      return 'Reservado'
     case 'blocked':
+    default:
       return 'Secretaria'
   }
 })
 
-// Set badge colors
+// badgeColor também lida com o novo status 'reserved'
 const badgeColor = computed(() => {
-  switch (normalizedStatus.value) {
+  switch (props.status) {
     case 'available':
       return 'bg-green-100 text-green-700'
-    case 'in_use':
-      return 'bg-red-100 text-red-700'
+    case 'in_use': // Mudei para amarelo para diferenciar de 'reservado'
+      return 'bg-yellow-100 text-yellow-700'
+    case 'reserved': // Nova cor para o status de reserva
+      return 'bg-blue-100 text-blue-700'
     case 'blocked':
+    default:
       return 'bg-gray-100 text-gray-700'
   }
 })
