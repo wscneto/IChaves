@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
-    <!-- Search Bar -->
     <div class="p-4">
       <input
         type="text"
@@ -10,9 +9,8 @@
       />
     </div>
 
-    <!-- Classroom List -->
     <main class="flex-1 p-4">
-      <div class="flex flex-col gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <NuxtLink
           v-for="room in filteredClassrooms"
           :key="room.id"
@@ -22,11 +20,19 @@
           <div
             class="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition flex items-center justify-between"
           >
-            <div class="flex items-center gap-10">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-1 h-8 rounded-md"
+                :class="{
+                  'bg-green-500': room.status === 'available',
+                  'bg-yellow-500': room.status === 'in_use',
+                  'bg-gray-300': room.status === 'unknown'
+                }"
+              ></div>
               <h2 class="text-lg font-semibold text-gray-800">
                 {{ room.name }}
               </h2>
-              <StatusBadge :status="room.status" />
+              <StatusBadge :status="room.status" class="hidden lg:inline-block" />
             </div>
 
             <button
