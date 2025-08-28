@@ -3,7 +3,6 @@
     
     <BackButton />
 
-    <!--Informações do usuário-->
     <div class="bg-white p-6 rounded-2xl shadow flex items-center space-x-6">
       <img
         :src="user.avatar"
@@ -27,7 +26,7 @@
         <li
           v-for="item in history"
           :key="item.id"
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded-lg border"
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white rounded-lg shadow"
         >
           <div class="font-semibold text-gray-900">{{ item.keyName }}</div>
           <div class="text-sm text-gray-600 mt-2 sm:mt-0 sm:text-right space-y-1">
@@ -59,20 +58,20 @@ const history = ref([
   {
     id: 1,
     keyName: 'Armário 1',
-    reservationDate: '04/06/1974 14:33',
-    returnDate: '04/06/1974 14:34'
+    reservationDate: '04/06/2024 14:33',
+    returnDate: '04/06/2024 16:00'
   },
   {
     id: 2,
-    keyName: 'Laboratório 01',
+    keyName: 'Lab 01',
     reservationDate: '25/10/2025 15:19',
     returnDate: '25/10/2025 18:00'
   },
   {
     id: 3,
     keyName: 'Sala de Convivência',
-    reservationDate: '24/10/2025 10:00',
-    returnDate: '24/10/2023 11:30'
+    reservationDate: '24/02/2025 10:00',
+    returnDate: '24/02/2025 18:30'
   }
 ])
 
