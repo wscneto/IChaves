@@ -37,11 +37,13 @@ onMounted(() => {
   const id = Number(route.params.id)
   // TODO: Replace this with real API call
   const classroomsMock = [
-    { id: 1, name: 'Lab 01', status: 'in_use', capacity: 25, equipment: ['Projetor', 'Computadores', 'Quadro Branco'], description: 'Sala de tamanho médio' },
-    { id: 2, name: 'Lab 02', status: 'in_use', capacity: 25, equipment: ['Computadores', 'Quadro Branco', 'TVs'], description: 'Sala de tamanho médio' },
-    { id: 3, name: 'Lab 03', status: 'unknown', capacity: 20, equipment: ['Projetor', 'Computadores', 'Quadro Branco'], description: 'Só tem computador bomba...' },
-    { id: 4, name: 'Sala de Convivência' , status: 'available', capacity: 10, equipment: ['Sofá', 'Cafeteira'], description: 'Pequena sala para convivência dos alunos' },
-    { id: 5, name: 'Salinha', status: 'available', capacity: 10, equipment: ['Computadores', 'Mesas individuais'], description: 'Sala de estudos' },
+    { id: 1, name: 'Armário 01', status: 'available', capacity: 1, equipment: [], description: 'Armário para guardar pertences.' },
+    { id: 2, name: 'Armário 02', status: 'available', capacity: 1, equipment: [], description: 'Armário para guardar pertences.' },
+    { id: 3, name: 'Armário 03', status: 'available', capacity: 1, equipment: [], description: 'Armário para guardar pertences.' },
+    { id: 4, name: 'Armário 04', status: 'available', capacity: 1, equipment: [], description: 'Armário para guardar pertences.' },
+    { id: 5, name: 'Sala de Convivência' , status: 'blocked', capacity: 10, equipment: ['Sofá', 'Cafeteira'], description: 'Pequena sala para convivência dos alunos' },
+    { id: 6, name: 'Sala de Estudos', status: 'available', capacity: 10, equipment: ['Computadores', 'Mesas individuais'], description: 'Sala de estudos' },
+    { id: 7, name: 'Laboratório 03', status: 'in_use', capacity: 25, equipment: ['Computadores', 'Quadro Branco', 'TVs'], description: 'Sala de tamanho médio' },
   ]
   const found = classroomsMock.find(c => c.id === id)
   if (found) classroom.value = found
