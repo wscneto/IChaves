@@ -1,2 +1,2 @@
 # IChaves
-IChaves is a key manager designed for the Computing Institute of the Federal University of Alagoas.
+IChaves is a key manager designed for the Instituto de Computação in Universidade Federal de Alagoas.
