@@ -10,53 +10,84 @@
     </div>
 
     <main class="flex-1 p-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <NuxtLink
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div
           v-for="room in filteredClassrooms"
           :key="room.id"
-          :to="`/classrooms/${room.id}`"
-          class="block"
+          class="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition flex items-center justify-between cursor-pointer"
+          @click="goToClassroom(room.id)"
         >
-          <div
-            class="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition flex items-center justify-between"
-          >
-            <div class="flex items-center gap-4">
-              <div
-                class="w-1 h-8 rounded-md"
-                :class="{
-                  'bg-green-500': room.status === 'available',
-                  'bg-yellow-500': room.status === 'in_use',
-                  'bg-gray-300': room.status === 'unknown'
-                }"
-              ></div>
-              <h2 class="text-lg font-semibold text-gray-800">
-                {{ room.name }}
-              </h2>
-              <StatusBadge :status="room.status" class="hidden lg:inline-block" />
-            </div>
-
-            <button
-              @click.stop="handleAction(room)"
-              :disabled="room.status === 'unknown'"
-              :class="[
-                'ml-4 px-4 py-2 rounded-lg font-medium transition',
-                room.status === 'available'
-                  ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
-                  : room.status === 'in_use'
-                  ? 'bg-yellow-500 text-white hover:bg-yellow-600 cursor-pointer'
-                  : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-              ]"
-            >
-              {{
-                room.status === 'available'
-                  ? 'Pegar chave'
-                  : room.status === 'in_use'
-                  ? 'Trocar chave'
-                  : 'Indisponível'
-              }}
-            </button>
+          <div class="flex items-center gap-4">
+            <div
+              class="w-1 h-8 rounded-md"
+              :class="{
+                'bg-green-500': room.status === 'available',
+                'bg-yellow-500': room.status === 'in_use',
+                'bg-gray-300': room.status === 'unknown' || room.status === 'blocked'
+              }"
+            ></div>
+            <h2 class="text-lg font-semibold text-gray-800">
+              {{ room.name }}
+            </h2>
+            <StatusBadge :status="room.status" class="hidden lg:inline-block" />
           </div>
-        </NuxtLink>
+
+          <div @click.stop>
+            <template v-if="authStore.user.role === 'admin'">
+              <button
+                v-if="room.status === 'available'"
+                @click="handleBlock(room)"
+                class="px-4 py-2 rounded-lg font-medium bg-red-500 text-white hover:bg-red-600 transition"
+              >
+                Bloquear
+              </button>
+              <button
+                v-else-if="room.status === 'in_use'"
+                @click="handleForceDevolution(room)"
+                class="px-4 py-2 rounded-lg font-medium bg-orange-500 text-white hover:bg-orange-600 transition"
+              >
+                Forçar Devolução
+              </button>
+              <button
+                v-else-if="room.status === 'blocked'"
+                @click="handleUnblock(room)"
+                class="px-4 py-2 rounded-lg font-medium bg-green-500 text-white hover:bg-green-600 transition"
+              >
+                Desbloquear
+              </button>
+              <button
+                v-else
+                disabled
+                class="px-4 py-2 rounded-lg font-medium bg-gray-300 text-gray-600 cursor-not-allowed"
+              >
+                Indisponível
+              </button>
+            </template>
+
+            <template v-else>
+              <button
+                @click="handleAction(room)"
+                :disabled="room.status === 'unknown' || room.status === 'blocked'"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition',
+                  room.status === 'available'
+                    ? 'bg-green-500 text-white hover:bg-green-600'
+                    : room.status === 'in_use'
+                    ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                ]"
+              >
+                {{
+                  room.status === 'available'
+                    ? 'Pegar chave'
+                    : room.status === 'in_use'
+                    ? 'Trocar chave'
+                    : 'Indisponível'
+                }}
+              </button>
+            </template>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -64,8 +95,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { useAuthStore } from '@/stores/auth'
 
+const router = useRouter()
+const authStore = useAuthStore()
 const searchQuery = ref('')
 
 const classrooms = ref([
@@ -82,6 +117,10 @@ const filteredClassrooms = computed(() =>
   )
 )
 
+const goToClassroom = (id: number) => {
+  router.push(`/classrooms/${id}`)
+}
+
 const handleAction = (room: { id: number; name: string; status: string }) => {
   if (room.status === 'available') {
     alert(`Você pegou a chave da sala ${room.name}!`)
@@ -91,5 +130,20 @@ const handleAction = (room: { id: number; name: string; status: string }) => {
   } else {
     alert(`A sala ${room.name} está indisponível.`)
   }
+}
+
+const handleBlock = (room: { id: number; name: string; status: string }) => {
+  alert(`A sala ${room.name} foi bloqueada!`)
+  room.status = 'blocked'
+}
+
+const handleForceDevolution = (room: { id: number; name: string; status: string }) => {
+  alert(`A sala ${room.name} foi devolvida à força!`)
+  room.status = 'available'
+}
+
+const handleUnblock = (room: { id: number; name: string; status: string }) => {
+  alert(`A sala ${room.name} foi desbloqueada!`)
+  room.status = 'available'
 }
 </script>
