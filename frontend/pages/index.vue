@@ -14,8 +14,12 @@
         <div
           v-for="room in filteredClassrooms"
           :key="room.id"
-          class="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition flex items-center justify-between cursor-pointer"
-          @click="goToClassroom(room.id)"
+          class="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition flex items-center justify-between"
+          :class="{
+            'cursor-pointer': room.status !== 'blocked',
+            'cursor-not-allowed opacity-70': room.status === 'blocked'
+          }"
+          @click="room.status !== 'blocked' && goToClassroom(room.id)"
         >
           <div class="flex items-center gap-4">
             <div
@@ -23,7 +27,8 @@
               :class="{
                 'bg-green-500': room.status === 'available',
                 'bg-yellow-500': room.status === 'in_use',
-                'bg-gray-300': room.status === 'unknown' || room.status === 'blocked'
+                'bg-red-500': room.status === 'blocked',
+                'bg-gray-300': room.status === 'unknown'
               }"
             ></div>
             <h2 class="text-lg font-semibold text-gray-800">
@@ -74,6 +79,8 @@
                     ? 'bg-green-500 text-white hover:bg-green-600'
                     : room.status === 'in_use'
                     ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                    : room.status === 'blocked'
+                    ? 'bg-red-500 text-white cursor-not-allowed'
                     : 'bg-gray-300 text-gray-600 cursor-not-allowed'
                 ]"
               >
@@ -82,6 +89,8 @@
                     ? 'Pegar chave'
                     : room.status === 'in_use'
                     ? 'Trocar chave'
+                    : room.status === 'blocked'
+                    ? 'Bloqueado'
                     : 'Indisponível'
                 }}
               </button>
@@ -108,7 +117,7 @@ const classrooms = ref([
   { id: 2, name: 'Lab 02', status: 'in_use' },
   { id: 3, name: 'Lab 03', status: 'unknown' },
   { id: 4, name: 'Sala de Convivência', status: 'available' },
-  { id: 5, name: 'Salinha', status: 'available' },
+  { id: 5, name: 'Salinha', status: 'blocked' },
 ])
 
 const filteredClassrooms = computed(() =>
@@ -127,6 +136,8 @@ const handleAction = (room: { id: number; name: string; status: string }) => {
     room.status = 'in_use'
   } else if (room.status === 'in_use') {
     alert(`Você trocou a chave da sala ${room.name}.`)
+  } else if (room.status === 'blocked') {
+    alert(`A sala ${room.name} está bloqueada.`)
   } else {
     alert(`A sala ${room.name} está indisponível.`)
   }
@@ -147,3 +158,4 @@ const handleUnblock = (room: { id: number; name: string; status: string }) => {
   room.status = 'available'
 }
 </script>
+
