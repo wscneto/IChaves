@@ -4,7 +4,7 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: {
       name: 'Walter Neto',
-      role: 'admin' as 'student' | 'admin'
+      role: 'student' as 'student' | 'admin'
     }
   }),
   actions: {
