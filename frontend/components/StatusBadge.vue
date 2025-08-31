@@ -1,7 +1,7 @@
 <template>
   <span
     :class="[
-      'px-3 py-1 text-xs font-semibold rounded-full',
+      'px-3 py-1 text-sm font-semibold rounded-full',
       badgeColor
     ]"
   >
@@ -17,7 +17,7 @@ const { status } = defineProps<{
 }>()
 
 const normalizedStatus = computed(() => {
-  return status === 'available' || status === 'in_use' ? status : 'unknown'
+  return status === 'available' || status === 'in_use' || status === 'blocked' ? status : 'unknown'
 })
 
 const statusLabel = computed(() => {
@@ -26,19 +26,22 @@ const statusLabel = computed(() => {
       return 'Disponível'
     case 'in_use':
       return 'Em uso'
-    case 'unknown':
+    case 'blocked':
+      return 'Bloqueado'
+    default:
       return 'Desconhecido'
   }
 })
 
-// Set badge colors
 const badgeColor = computed(() => {
   switch (normalizedStatus.value) {
     case 'available':
       return 'bg-green-100 text-green-700'
     case 'in_use':
+      return 'bg-yellow-100 text-yellow-700'
+    case 'blocked':
       return 'bg-red-100 text-red-700'
-    case 'unknown':
+    default:
       return 'bg-gray-100 text-gray-700'
   }
 })
