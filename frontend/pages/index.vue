@@ -26,7 +26,8 @@
               class="w-1 h-8 rounded-md"
               :class="{
                 'bg-green-500': room.status === 'available',
-                'bg-yellow-500': room.status === 'in_use',
+                'bg-orange-500': room.status === 'in_use',
+                'bg-yellow-500': room.status === 'reserved',
                 'bg-red-500': room.status === 'blocked',
                 'bg-gray-300': room.status === 'unknown'
               }"
@@ -78,6 +79,8 @@
                   room.status === 'available'
                     ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
                     : room.status === 'in_use'
+                    ? 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer'
+                    : room.status === 'reserved'
                     ? 'bg-yellow-500 text-white hover:bg-yellow-600 cursor-pointer'
                     : room.status === 'blocked'
                     ? 'bg-red-500 text-white cursor-not-allowed'
@@ -87,6 +90,8 @@
                 {{
                   room.status === 'available'
                     ? 'Pegar chave'
+                    : room.status === 'reserved'
+                    ? 'Devolver'
                     : room.status === 'in_use'
                     ? 'Trocar chave'
                     : room.status === 'blocked'
@@ -113,11 +118,13 @@ const authStore = useAuthStore()
 const searchQuery = ref('')
 
 const classrooms = ref([
-  { id: 1, name: 'Lab 01', status: 'in_use' },
-  { id: 2, name: 'Lab 02', status: 'in_use' },
-  { id: 3, name: 'Lab 03', status: 'unknown' },
-  { id: 4, name: 'Sala de Convivência', status: 'available' },
-  { id: 5, name: 'Salinha', status: 'blocked' },
+  { id: 1, name: 'Armário 01', status: 'available' },
+  { id: 2, name: 'Armário 02', status: 'in_use' }, // Exemplo de sala já reservada
+  { id: 3, name: 'Armário 03', status: 'available' },
+  { id: 4, name: 'Armário 04', status: 'available' },
+  { id: 5, name: 'Sala de Convivência', status: 'blocked' },
+  { id: 6, name: 'Sala de Estudos', status: 'available' },
+  { id: 7, name: 'Laboratório 03', status: 'in_use' },
 ])
 
 const filteredClassrooms = computed(() =>
@@ -133,12 +140,17 @@ const goToClassroom = (id: number) => {
 const handleAction = (room: { id: number; name: string; status: string }) => {
   if (room.status === 'available') {
     alert(`Você pegou a chave da sala ${room.name}!`)
-    room.status = 'in_use'
+    room.status = 'reserved'
   } else if (room.status === 'in_use') {
     alert(`Você trocou a chave da sala ${room.name}.`)
+    room.status = 'reserved'
   } else if (room.status === 'blocked') {
     alert(`A sala ${room.name} está bloqueada.`)
-  } else {
+  }else if (room.status === 'reserved'){
+    alert(`Você devolveu a chave da ${room.name}!`)
+    room.status = 'available'
+  } 
+  else {
     alert(`A sala ${room.name} está indisponível.`)
   }
 }
