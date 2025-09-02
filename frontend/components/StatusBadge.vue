@@ -17,7 +17,7 @@ const { status } = defineProps<{
 }>()
 
 const normalizedStatus = computed(() => {
-  return status === 'available' || status === 'in_use' || status === 'blocked' ? status : 'unknown'
+  return status === 'available' || status === 'in_use' || status === 'blocked' || status === 'reserved' ? status : 'unknown'
 })
 
 const statusLabel = computed(() => {
@@ -28,6 +28,8 @@ const statusLabel = computed(() => {
       return 'Em uso'
     case 'blocked':
       return 'Bloqueado'
+    case 'reserved':
+      return 'Reservado'
     default:
       return 'Desconhecido'
   }
@@ -38,9 +40,11 @@ const badgeColor = computed(() => {
     case 'available':
       return 'bg-green-100 text-green-700'
     case 'in_use':
-      return 'bg-yellow-100 text-yellow-700'
+      return 'bg-orange-100 text-orange-700'
     case 'blocked':
       return 'bg-red-100 text-red-700'
+    case 'reserved':
+      return 'bg-yellow-100 text-yellow-700'                  
     default:
       return 'bg-gray-100 text-gray-700'
   }
