@@ -42,21 +42,21 @@
               <button
                 v-if="room.status === 'available'"
                 @click="handleBlock(room)"
-                class="px-4 py-2 rounded-lg font-medium bg-red-500 text-white hover:bg-red-600 transition"
+                class="px-4 py-2 rounded-lg font-medium bg-red-500 text-white hover:bg-red-600 transition cursor-pointer"
               >
                 Bloquear
               </button>
               <button
                 v-else-if="room.status === 'in_use'"
                 @click="handleForceDevolution(room)"
-                class="px-4 py-2 rounded-lg font-medium bg-orange-500 text-white hover:bg-orange-600 transition"
+                class="px-4 py-2 rounded-lg font-medium bg-orange-500 text-white hover:bg-orange-600 transition cursor-pointer"
               >
                 Forçar Devolução
               </button>
               <button
                 v-else-if="room.status === 'blocked'"
                 @click="handleUnblock(room)"
-                class="px-4 py-2 rounded-lg font-medium bg-green-500 text-white hover:bg-green-600 transition"
+                class="px-4 py-2 rounded-lg font-medium bg-green-500 text-white hover:bg-green-600 transition cursor-pointer"
               >
                 Desbloquear
               </button>
@@ -76,9 +76,9 @@
                 :class="[
                   'px-4 py-2 rounded-lg font-medium transition',
                   room.status === 'available'
-                    ? 'bg-green-500 text-white hover:bg-green-600'
+                    ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
                     : room.status === 'in_use'
-                    ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                    ? 'bg-yellow-500 text-white hover:bg-yellow-600 cursor-pointer'
                     : room.status === 'blocked'
                     ? 'bg-red-500 text-white cursor-not-allowed'
                     : 'bg-gray-300 text-gray-600 cursor-not-allowed'
