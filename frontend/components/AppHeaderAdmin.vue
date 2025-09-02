@@ -1,5 +1,5 @@
 <template>
-  <header class="fixed w-full h-[60px] sm:h-[80px] lg:h-[100px] flex items-center justify-between px-6 py-3 md:px-12 bg-gray-200 shadow-md z-100">
+  <header class="fixed w-full h-[60px] sm:h-[80px] lg:h-[100px] flex items-center justify-between px-6 py-3 md:px-12 bg-gray-200 shadow-md z-50">
     <NuxtLink to="/" class="flex items-center">
       <img
         src="@/assets/images/ichaves-logo.svg"
@@ -8,8 +8,11 @@
       />
     </NuxtLink>
 
-    <div class="flex items-center space-x-3">
-      <NotificationBell />
+    <div class="flex items-center space-x-3 relative">
+      <div class="relative">
+        <NotificationBell @toggle="showCard = !showCard" />
+        <NotificationCard :show="showCard" />
+      </div>
 
       <NuxtLink to="/user" class="flex items-center space-x-3">
         <span class="hidden sm:block text-gray-700 font-medium text-xl">
@@ -24,3 +27,29 @@
     </div>
   </header>
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import NotificationBell from '@/components/NotificationBell.vue'
+import NotificationCard from '@/components/NotificationCard.vue'
+
+const showCard = ref(false)
+
+function handleClickOutside(event: MouseEvent) {
+  const bellArea = document.querySelector('.notification-area')
+  if (bellArea && !bellArea.contains(event.target as Node)) {
+    showCard.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+const notifications = useNotificationsStore()
+notifications.seed()
+</script>
