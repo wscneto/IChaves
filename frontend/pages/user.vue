@@ -3,12 +3,14 @@
     
     <BackButton />
 
-    <div class="bg-white p-6 rounded-2xl shadow flex items-center space-x-6">
+    <!-- user info section -->
+    <div class="flex flex-col sm:flex-row p-6 rounded-2xl shadow items-center space-x-6 ">
       <img
         :src="user.avatar"
         alt="User Avatar"
         class="w-24 h-24 rounded-full border border-gray-300 flex-shrink-0"
       />
+      <!-- profile info -->
       <div>
         <h1 class="text-2xl font-bold text-gray-800 mb-2">{{ user.name }}</h1>
         <p class="text-gray-600 mb-4">Email: {{ user.email }}</p>
