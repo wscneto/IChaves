@@ -65,7 +65,7 @@ const history = ref([
   },
   {
     id: 2,
-    keyName: 'Lab 01',
+    keyName: 'Lab 03',
     reservationDate: '25/10/2025 15:19',
     returnDate: '25/10/2025 18:00'
   },
