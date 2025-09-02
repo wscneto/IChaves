@@ -34,7 +34,7 @@
             <h2 class="text-lg font-semibold text-gray-800">
               {{ room.name }}
             </h2>
-            <StatusBadge :status="room.status" class="hidden lg:inline-block" />
+            <StatusBadge :status="room.status" class="hidden sm:inline-block" />
           </div>
 
           <div @click.stop>
