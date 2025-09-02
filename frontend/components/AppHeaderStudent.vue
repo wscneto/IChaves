@@ -1,5 +1,5 @@
 <template>
-  <header class="fixed w-full h-[60px] sm:h-[80px] lg:h-[100px] flex items-center justify-between px-4 py-3 bg-white shadow-md z-100">
+  <header class="fixed w-full h-[60px] sm:h-[80px] lg:h-[100px] flex items-center justify-between px-6 py-3 md:px-12 bg-white shadow-md z-100">
     <NuxtLink to="/" class="flex items-center">
       <img
         src="@/assets/images/ichaves-logo.svg"
