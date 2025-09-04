@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="show"
-    class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-lg p-4 z-50"
+    class="flex flex-col absolute mt-2 bg-white rounded-2xl shadow-lg p-4 z-50 max-w w-65 right-0 left-auto"
   >
     <h2 class="text-lg font-bold mb-3">Notificações</h2>
 
@@ -9,11 +9,13 @@
       <li
         v-for="req in notifications.pendingRequests"
         :key="req.id"
-        class="p-3 bg-gray-100 rounded-lg flex justify-between items-center"
+        class="p-3 bg-gray-100 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
       >
-        <span>{{ req.student }} pediu a sala {{ req.classroom }}</span>
+        <span class="flex-1"
+          >{{ req.student }} pediu a chave do {{ req.classroom }}</span
+        >
         <button
-          class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition cursor-pointer self-end sm:self-center"
           @click="accept(req.id)"
         >
           Aceitar
