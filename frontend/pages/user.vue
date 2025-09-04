@@ -12,7 +12,7 @@
       />
       <!-- profile info -->
       <div>
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">{{ user.name }}</h1>
+        <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center sm:text-left">{{ user.name }}</h1>
         <p class="text-gray-600 mb-4">Email: {{ user.email }}</p>
         <div class="flex space-x-4">
           <p><strong>Perfil:</strong> {{ user.role }}</p>
