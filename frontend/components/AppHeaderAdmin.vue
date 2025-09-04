@@ -9,7 +9,7 @@
     </NuxtLink>
 
     <div class="flex items-center space-x-3 relative">
-      <div class="relative">
+      <div class="relative" ref="notificationArea">
         <NotificationBell @toggle="showCard = !showCard" />
         <NotificationCard :show="showCard" />
       </div>
@@ -34,10 +34,10 @@ import NotificationBell from '@/components/NotificationBell.vue'
 import NotificationCard from '@/components/NotificationCard.vue'
 
 const showCard = ref(false)
+const notificationArea = ref<HTMLElement | null>(null)
 
 function handleClickOutside(event: MouseEvent) {
-  const bellArea = document.querySelector('.notification-area')
-  if (bellArea && !bellArea.contains(event.target as Node)) {
+  if (notificationArea.value && !notificationArea.value.contains(event.target as Node)) {
     showCard.value = false
   }
 }
