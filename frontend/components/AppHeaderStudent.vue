@@ -8,6 +8,10 @@
       />
     </NuxtLink>
     <div class="flex items-center space-x-3">
+      <div class="relative" ref="notificationArea">
+        <NotificationBell @toggle="showCard = !showCard" />
+        <NotificationCard :show="showCard" />
+      </div>
       <NuxtLink to="/user" class="flex items-center space-x-3">
         <span class="hidden sm:block text-gray-700 font-medium text-xl ">
           Walter Neto
@@ -21,3 +25,29 @@
     </div>
   </header>
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import NotificationBell from '@/components/NotificationBell.vue'
+import NotificationCard from '@/components/NotificationCard.vue'
+
+const showCard = ref(false)
+const notificationArea = ref<HTMLElement | null>(null)
+
+function handleClickOutside(event: MouseEvent) {
+  if (notificationArea.value && !notificationArea.value.contains(event.target as Node)) {
+    showCard.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+const notifications = useNotificationsStore()
+notifications.seed()
+</script>
