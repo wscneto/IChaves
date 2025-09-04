@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Search Input -->
     <div class="p-4">
       <input
         type="text"
@@ -9,6 +10,7 @@
       />
     </div>
 
+    <!-- Classrooms Grid -->
     <main class="flex-1 p-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div
@@ -17,9 +19,9 @@
           class="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition flex items-center justify-between"
           :class="{
             'cursor-pointer': room.status !== 'blocked',
-            'cursor-not-allowed opacity-70': room.status === 'blocked'
+            'cursor-pointer opacity-70': room.status === 'blocked'
           }"
-          @click="room.status !== 'blocked' && goToClassroom(room.id)"
+          @click="room.status !== 'unknow' && goToClassroom(room.id)"
         >
           <div class="flex items-center gap-4">
             <div
@@ -104,12 +106,22 @@
         </div>
       </div>
     </main>
+
+    <!-- Confirmation Popup -->
+    <ConfirmPopUp
+      :show="isConfirmOpen"
+      :title="confirmTitle"
+      :message="confirmMessage"
+      @confirm="onConfirm"
+      @cancel="isConfirmOpen = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import ConfirmPopUp from '@/components/ConfirmPopUp.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -117,6 +129,11 @@ const router = useRouter()
 const authStore = useAuthStore()
 const searchQuery = ref('')
 
+// State for confirmation popup
+const isConfirmOpen = ref(false)
+const confirmTitle = ref('')
+const confirmMessage = ref('')
+let onConfirmAction: (() => void) | null = null
 const classrooms = ref([
   { id: 1, name: 'Armário 01', status: 'available' },
   { id: 2, name: 'Armário 02', status: 'in_use' }, // Exemplo de sala já reservada
@@ -137,37 +154,64 @@ const goToClassroom = (id: number) => {
   router.push(`/classrooms/${id}`)
 }
 
+const openConfirmPopup = (title: string, message: string, action: () => void) => {
+  confirmTitle.value = title
+  confirmMessage.value = message
+  onConfirmAction = action
+  isConfirmOpen.value = true
+}
+
+const onConfirm = () => {
+  if (onConfirmAction) {
+    onConfirmAction()
+  }
+  isConfirmOpen.value = false
+  onConfirmAction = null
+}
+
 const handleAction = (room: { id: number; name: string; status: string }) => {
   if (room.status === 'available') {
-    alert(`Você pegou a chave da sala ${room.name}!`)
-    room.status = 'reserved'
+    openConfirmPopup('Pegar Chave', `Você tem certeza que deseja pegar a chave da sala ${room.name}?`, () => {
+      room.status = 'reserved'
+    })
   } else if (room.status === 'in_use') {
-    alert(`Você trocou a chave da sala ${room.name}.`)
-    room.status = 'reserved'
+    openConfirmPopup('Trocar Chave', `Você tem certeza que deseja trocar a chave da sala ${room.name}?`, () => {
+      room.status = 'reserved'
+    })
   } else if (room.status === 'blocked') {
     alert(`A sala ${room.name} está bloqueada.`)
-  }else if (room.status === 'reserved'){
-    alert(`Você devolveu a chave da ${room.name}!`)
-    room.status = 'available'
-  } 
-  else {
+  } else if (room.status === 'reserved') {
+    openConfirmPopup('Devolver Chave', `Você tem certeza que deseja devolver a chave da ${room.name}?`, () => {
+      room.status = 'available'
+    })
+  } else {
     alert(`A sala ${room.name} está indisponível.`)
   }
 }
 
 const handleBlock = (room: { id: number; name: string; status: string }) => {
-  alert(`A sala ${room.name} foi bloqueada!`)
-  room.status = 'blocked'
+  openConfirmPopup(
+    'Bloquear Sala',
+    `Você tem certeza que deseja bloquear a sala ${room.name}?`,
+    () => {
+      room.status = 'blocked'
+    }
+  )
 }
 
 const handleForceDevolution = (room: { id: number; name: string; status: string }) => {
-  alert(`A sala ${room.name} foi devolvida à força!`)
-  room.status = 'available'
+  openConfirmPopup(
+    'Forçar Devolução',
+    `Você tem certeza que deseja forçar a devolução da sala ${room.name}?`,
+    () => {
+      room.status = 'available'
+    }
+  )
 }
 
 const handleUnblock = (room: { id: number; name: string; status: string }) => {
-  alert(`A sala ${room.name} foi desbloqueada!`)
-  room.status = 'available'
+  openConfirmPopup('Desbloquear Sala', `Você tem certeza que deseja desbloquear a sala ${room.name}?`, () => {
+    room.status = 'available'
+  })
 }
 </script>
-
