@@ -13,27 +13,26 @@
         <p><strong>Capacidade:</strong> {{ classroom.capacity }}</p>
         <p><strong>Equipamentos:</strong> {{ classroom.equipment.join(', ') }}</p>
         <p><strong>Descrição:</strong> {{ classroom.description }}</p>
-        <p><strong>Nota da secretaria:</strong> {{ classroom.note }}</p>
-        <ul class="space-y-4">
-          <li
-            v-for="item in history"
-            :key="item.id"
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white rounded-lg shadow"
-          >
-            <div class="font-semibold text-gray-900">{{ item.keyName }}</div>
-            <div class="text-sm text-gray-600 mt-2 sm:mt-0 sm:text-right space-y-1">
-              <p>
-                <span class="font-medium">Reservado:</span> {{ item.reservationDate }}
-              </p>
-              <p>
-                <span class="font-medium">Devolvido:</span> {{ item.returnDate }}
-              </p>
-            </div>
-          </li>
-        </ul>
+      <ul class="space-y-4">
+        <li
+          v-for="item in history"
+          :key="item.id"
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white rounded-lg shadow"
+        >
+          <div class="font-semibold text-gray-900">{{ item.keyName }}</div>
+          <div class="text-sm text-gray-600 mt-2 sm:mt-0 sm:text-right space-y-1">
+            <p>
+              <span class="font-medium">Reservado:</span> {{ item.reservationDate }}
+            </p>
+            <p>
+              <span class="font-medium">Devolvido:</span> {{ item.returnDate }}
+            </p>
+          </div>
+        </li>
+      </ul>
+      </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -48,8 +47,7 @@ const classroom = ref<any>({
   status: 'unknown',
   capacity: 0,
   equipment: [],
-  description: '',
-  note: ''
+  description: ''
 })
 
 onMounted(() => {
@@ -60,7 +58,7 @@ onMounted(() => {
     { id: 2, name: 'Armário 02', status: 'available', capacity: 1, equipment: [], description: 'Armário para guardar pertences.' },
     { id: 3, name: 'Armário 03', status: 'available', capacity: 1, equipment: [], description: 'Armário para guardar pertences.' },
     { id: 4, name: 'Armário 04', status: 'available', capacity: 1, equipment: [], description: 'Armário para guardar pertences.' },
-    { id: 5, name: 'Sala de Convivência' , status: 'blocked', capacity: 10, equipment: ['Sofá', 'Cafeteira'], description: 'Pequena sala para convivência dos alunos', note: 'Bloqueada devido a uso indevido.' },
+    { id: 5, name: 'Sala de Convivência' , status: 'blocked', capacity: 10, equipment: ['Sofá', 'Cafeteira'], description: 'Pequena sala para convivência dos alunos' },
     { id: 6, name: 'Sala de Estudos', status: 'available', capacity: 10, equipment: ['Computadores', 'Mesas individuais'], description: 'Sala de estudos' },
     { id: 7, name: 'Laboratório 03', status: 'in_use', capacity: 25, equipment: ['Computadores', 'Quadro Branco', 'TVs'], description: 'Sala de tamanho médio' },
   ]
