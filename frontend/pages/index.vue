@@ -2,107 +2,52 @@
   <div class="min-h-screen flex flex-col bg-gray-50">
     <!-- Search Input -->
     <div class="p-4">
+      <div v-if="isLoading" class="animate-pulse">
+        <div class="h-12 bg-gray-200 rounded-xl"></div>
+      </div>
       <input
+        v-else
         type="text"
         placeholder="Busque uma sala..."
         v-model="searchQuery"
-        class="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        class="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none font-funnel-sans"
       />
+    </div>
+
+    <!-- Loading Message -->
+    <div v-if="isLoading" class="px-4 pb-2">
+      <div class="animate-pulse">
+        <div class="h-4 bg-gray-200 rounded w-48"></div>
+      </div>
     </div>
 
     <!-- Classrooms Grid -->
     <main class="flex-1 p-4">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div
-          v-for="room in filteredClassrooms"
-          :key="room.id"
-          class="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition flex items-center justify-between"
-          :class="{
-            'cursor-pointer': room.status !== 'blocked',
-            'cursor-pointer opacity-70': room.status === 'blocked'
-          }"
-          @click="room.status !== 'unknow' && goToClassroom(room.id)"
-        >
-          <div class="flex items-center gap-4">
-            <div
-              class="w-1 h-8 rounded-md"
-              :class="{
-                'bg-green-500': room.status === 'available',
-                'bg-orange-500': room.status === 'in_use',
-                'bg-yellow-500': room.status === 'reserved',
-                'bg-red-500': room.status === 'blocked',
-                'bg-gray-300': room.status === 'unknown'
-              }"
-            ></div>
-            <h2 class="text-lg font-semibold text-gray-800">
-              {{ room.name }}
-            </h2>
-            <StatusBadge :status="room.status" class="hidden sm:inline-block" />
-          </div>
+      <!-- Loading State -->
+      <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <ClassroomItemSkeleton v-for="n in 8" :key="n" />
+      </div>
 
-          <div @click.stop>
-            <template v-if="authStore.user.role === 'admin'">
-              <button
-                v-if="room.status === 'available'"
-                @click="handleBlock(room)"
-                class="px-4 py-2 rounded-lg font-medium bg-red-500 text-white hover:bg-red-600 transition cursor-pointer"
-              >
-                Bloquear
-              </button>
-              <button
-                v-else-if="room.status === 'in_use'"
-                @click="handleForceDevolution(room)"
-                class="px-4 py-2 rounded-lg font-medium bg-orange-500 text-white hover:bg-orange-600 transition cursor-pointer"
-              >
-                Forçar Devolução
-              </button>
-              <button
-                v-else-if="room.status === 'blocked'"
-                @click="handleUnblock(room)"
-                class="px-4 py-2 rounded-lg font-medium bg-green-500 text-white hover:bg-green-600 transition cursor-pointer"
-              >
-                Desbloquear
-              </button>
-              <button
-                v-else
-                disabled
-                class="px-4 py-2 rounded-lg font-medium bg-gray-300 text-gray-600 cursor-not-allowed"
-              >
-                Indisponível
-              </button>
-            </template>
+      <!-- Classrooms Content -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <ClassroomItem
+          v-for="classroom in filteredClassrooms"
+          :key="classroom.ID_Classroom"
+          :classroom="classroom"
+          :user-role="authStore.user.role"
+          :is-loading="actionLoading === classroom.ID_Classroom"
+          @click="goToClassroom"
+          @action="handleClassroomAction"
+        />
+      </div>
 
-            <template v-else>
-              <button
-                @click="handleAction(room)"
-                :disabled="room.status === 'unknown' || room.status === 'blocked'"
-                :class="[
-                  'px-4 py-2 rounded-lg font-medium transition',
-                  room.status === 'available'
-                    ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
-                    : room.status === 'in_use'
-                    ? 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer'
-                    : room.status === 'reserved'
-                    ? 'bg-yellow-500 text-white hover:bg-yellow-600 cursor-pointer'
-                    : room.status === 'blocked'
-                    ? 'bg-red-500 text-white cursor-not-allowed'
-                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                ]"
-              >
-                {{
-                  room.status === 'available'
-                    ? 'Pegar chave'
-                    : room.status === 'reserved'
-                    ? 'Devolver'
-                    : room.status === 'in_use'
-                    ? 'Trocar chave'
-                    : room.status === 'blocked'
-                    ? 'Bloqueado'
-                    : 'Indisponível'
-                }}
-              </button>
-            </template>
-          </div>
+      <!-- Empty State -->
+      <div v-if="!isLoading && filteredClassrooms.length === 0" class="text-center py-12">
+        <div class="text-gray-500 text-lg font-funnel-sans">
+          Nenhuma sala encontrada
+        </div>
+        <div class="text-gray-400 text-sm mt-2">
+          Tente ajustar sua busca
         </div>
       </div>
     </main>
@@ -119,11 +64,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import type { Classroom } from '@/types/database'
 import ConfirmPopUp from '@/components/ConfirmPopUp.vue'
-import StatusBadge from '@/components/StatusBadge.vue'
+import ClassroomItem from '@/components/ClassroomItem.vue'
+import ClassroomItemSkeleton from '@/components/ClassroomItemSkeleton.vue'
 import { useAuthStore } from '@/stores/auth'
+import { getClassrooms, updateClassroomState } from '@/data/classrooms'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -134,24 +82,37 @@ const isConfirmOpen = ref(false)
 const confirmTitle = ref('')
 const confirmMessage = ref('')
 let onConfirmAction: (() => void) | null = null
-const classrooms = ref([
-  { id: 1, name: 'Armário 01', status: 'available' },
-  { id: 2, name: 'Armário 02', status: 'in_use' }, // Exemplo de sala já reservada
-  { id: 3, name: 'Armário 03', status: 'available' },
-  { id: 4, name: 'Armário 04', status: 'available' },
-  { id: 5, name: 'Sala de Convivência', status: 'blocked' },
-  { id: 6, name: 'Sala de Estudos', status: 'available' },
-  { id: 7, name: 'Laboratório 03', status: 'in_use' },
-])
+
+// Classrooms data
+const classrooms = ref<Classroom[]>([])
+const isLoading = ref(true) // Começa como true para mostrar skeleton imediatamente
+const actionLoading = ref<number | null>(null) // ID da sala que está sendo processada
 
 const filteredClassrooms = computed(() =>
-  classrooms.value.filter((room) =>
-    room.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  classrooms.value.filter((classroom) =>
+    classroom.Name.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 )
 
-const goToClassroom = (id: number) => {
-  router.push(`/classrooms/${id}`)
+// Load classrooms on mount
+onMounted(async () => {
+  isLoading.value = true
+  try {
+    // Delay mínimo para mostrar o skeleton
+    const [classroomsData] = await Promise.all([
+      getClassrooms(),
+      new Promise(resolve => setTimeout(resolve, 500)) // Delay mínimo de 500ms
+    ])
+    classrooms.value = classroomsData
+  } catch (error) {
+    console.error('Erro ao carregar salas:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
+
+const goToClassroom = (classroom: Classroom) => {
+  router.push(`/classrooms/${classroom.ID_Classroom}`)
 }
 
 const openConfirmPopup = (title: string, message: string, action: () => void) => {
@@ -169,49 +130,126 @@ const onConfirm = () => {
   onConfirmAction = null
 }
 
-const handleAction = (room: { id: number; name: string; status: string }) => {
-  if (room.status === 'available') {
-    openConfirmPopup('Pegar Chave', `Você tem certeza que deseja pegar a chave da sala ${room.name}?`, () => {
-      room.status = 'reserved'
-    })
-  } else if (room.status === 'in_use') {
-    openConfirmPopup('Trocar Chave', `Você tem certeza que deseja trocar a chave da sala ${room.name}?`, () => {
-      room.status = 'reserved'
-    })
-  } else if (room.status === 'blocked') {
-    alert(`A sala ${room.name} está bloqueada.`)
-  } else if (room.status === 'reserved') {
-    openConfirmPopup('Devolver Chave', `Você tem certeza que deseja devolver a chave da ${room.name}?`, () => {
-      room.status = 'available'
-    })
-  } else {
-    alert(`A sala ${room.name} está indisponível.`)
+const handleClassroomAction = async (action: string, classroom: Classroom) => {
+  switch (action) {
+    case 'reservar':
+      openConfirmPopup(
+        'Reservar Sala',
+        `Você tem certeza que deseja reservar a sala ${classroom.Name}?`,
+        async () => {
+          try {
+            actionLoading.value = classroom.ID_Classroom
+            await updateClassroomState(classroom.ID_Classroom, 'Em uso')
+            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
+            if (index !== -1) {
+              classrooms.value[index].State = 'Em uso'
+            }
+          } catch (error) {
+            console.error('Erro ao reservar sala:', error)
+            alert('Erro ao reservar a sala. Tente novamente.')
+          } finally {
+            actionLoading.value = null
+          }
+        }
+      )
+      break
+
+    case 'trocar':
+      openConfirmPopup(
+        'Trocar Sala',
+        `Você tem certeza que deseja trocar a sala ${classroom.Name}?`,
+        async () => {
+          try {
+            actionLoading.value = classroom.ID_Classroom
+            await updateClassroomState(classroom.ID_Classroom, 'Disponivel')
+            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
+            if (index !== -1) {
+              classrooms.value[index].State = 'Disponivel'
+            }
+          } catch (error) {
+            console.error('Erro ao trocar sala:', error)
+            alert('Erro ao trocar a sala. Tente novamente.')
+          } finally {
+            actionLoading.value = null
+          }
+        }
+      )
+      break
+
+    case 'solicitar':
+      openConfirmPopup(
+        'Solicitar Sala',
+        `Você tem certeza que deseja solicitar a sala ${classroom.Name}?`,
+        async () => {
+          try {
+            actionLoading.value = classroom.ID_Classroom
+            await updateClassroomState(classroom.ID_Classroom, 'Em uso')
+            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
+            if (index !== -1) {
+              classrooms.value[index].State = 'Em uso'
+            }
+          } catch (error) {
+            console.error('Erro ao solicitar sala:', error)
+            alert('Erro ao solicitar a sala. Tente novamente.')
+          } finally {
+            actionLoading.value = null
+          }
+        }
+      )
+      break
+
+    case 'suspender':
+      openConfirmPopup(
+        'Suspender Sala',
+        `Você tem certeza que deseja suspender a sala ${classroom.Name}?`,
+        async () => {
+          try {
+            actionLoading.value = classroom.ID_Classroom
+            await updateClassroomState(classroom.ID_Classroom, 'Indisponivel')
+            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
+            if (index !== -1) {
+              classrooms.value[index].State = 'Indisponivel'
+            }
+          } catch (error) {
+            console.error('Erro ao suspender sala:', error)
+            alert('Erro ao suspender a sala. Tente novamente.')
+          } finally {
+            actionLoading.value = null
+          }
+        }
+      )
+      break
+
+    case 'liberar':
+      openConfirmPopup(
+        'Liberar Sala',
+        `Você tem certeza que deseja liberar a sala ${classroom.Name}?`,
+        async () => {
+          try {
+            actionLoading.value = classroom.ID_Classroom
+            await updateClassroomState(classroom.ID_Classroom, 'Disponivel')
+            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
+            if (index !== -1) {
+              classrooms.value[index].State = 'Disponivel'
+            }
+          } catch (error) {
+            console.error('Erro ao liberar sala:', error)
+            alert('Erro ao liberar a sala. Tente novamente.')
+          } finally {
+            actionLoading.value = null
+          }
+        }
+      )
+      break
+
+    default:
+      console.warn('Ação não reconhecida:', action)
   }
 }
-
-const handleBlock = (room: { id: number; name: string; status: string }) => {
-  openConfirmPopup(
-    'Bloquear Sala',
-    `Você tem certeza que deseja bloquear a sala ${room.name}?`,
-    () => {
-      room.status = 'blocked'
-    }
-  )
-}
-
-const handleForceDevolution = (room: { id: number; name: string; status: string }) => {
-  openConfirmPopup(
-    'Forçar Devolução',
-    `Você tem certeza que deseja forçar a devolução da sala ${room.name}?`,
-    () => {
-      room.status = 'available'
-    }
-  )
-}
-
-const handleUnblock = (room: { id: number; name: string; status: string }) => {
-  openConfirmPopup('Desbloquear Sala', `Você tem certeza que deseja desbloquear a sala ${room.name}?`, () => {
-    room.status = 'available'
-  })
-}
 </script>
+
+<style scoped>
+.font-funnel-sans {
+  font-family: "Funnel Sans", sans-serif;
+}
+</style>
