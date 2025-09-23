@@ -23,8 +23,8 @@
         </h2>
         <div class="flex items-center gap-2 mt-1">
           <StatusBadge :status="classroom.State" class="hidden sm:inline-block" />
-          <span v-if="classroom.Capacity" class="text-sm text-gray-500 font-funnel-sans">
-            Capacidade: {{ classroom.Capacity }}
+          <span v-if="classroom.Description" class="text-sm text-gray-500 font-funnel-sans">
+            {{ classroom.Description }}
           </span>
         </div>
       </div>

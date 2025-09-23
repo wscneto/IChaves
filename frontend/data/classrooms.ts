@@ -48,6 +48,36 @@ export const mockClassrooms: Classroom[] = [
   },
   {
     ID_Classroom: 5,
+    Name: 'Armário 05',
+    State: 'Disponivel',
+    Capacity: 1,
+    Equipment: [],
+    Description: 'Armário para guardar pertences pessoais',
+    Responsible: 'Secretaria',
+    Secretary_Note: 'Armário em bom estado'
+  },
+  {
+    ID_Classroom: 6,
+    Name: 'Armário 06',
+    State: 'Em uso',
+    Capacity: 1,
+    Equipment: [],
+    Description: 'Armário para guardar pertences pessoais',
+    Responsible: 'Secretaria',
+    Secretary_Note: 'Armário em bom estado'
+  },
+  {
+    ID_Classroom: 7,
+    Name: 'Laboratório 03',
+    State: 'Disponivel',
+    Capacity: 25,
+    Equipment: ['Computadores', 'Quadro Branco', 'TVs', 'Projetor'],
+    Description: 'Laboratório de informática com equipamentos modernos',
+    Responsible: 'Coordenação de Informática',
+    Secretary_Note: 'Equipamentos atualizados em 2024'
+  },
+  {
+    ID_Classroom: 8,
     Name: 'Sala de Convivência',
     State: 'Indisponivel',
     Capacity: 10,
@@ -57,7 +87,7 @@ export const mockClassrooms: Classroom[] = [
     Secretary_Note: 'Em manutenção - problemas no ar condicionado'
   },
   {
-    ID_Classroom: 6,
+    ID_Classroom: 9,
     Name: 'Sala de Estudos',
     State: 'Disponivel',
     Capacity: 15,
@@ -65,46 +95,6 @@ export const mockClassrooms: Classroom[] = [
     Description: 'Sala silenciosa para estudos individuais e em grupo',
     Responsible: 'Biblioteca',
     Secretary_Note: 'Sala com excelente acústica'
-  },
-  {
-    ID_Classroom: 7,
-    Name: 'Laboratório 03',
-    State: 'Em uso',
-    Capacity: 25,
-    Equipment: ['Computadores', 'Quadro Branco', 'TVs', 'Projetor'],
-    Description: 'Laboratório de informática com equipamentos modernos',
-    Responsible: 'Coordenação de Informática',
-    Secretary_Note: 'Equipamentos atualizados em 2024'
-  },
-  {
-    ID_Classroom: 8,
-    Name: 'Laboratório de Redes',
-    State: 'Disponivel',
-    Capacity: 20,
-    Equipment: ['Roteadores', 'Switches', 'Cabeamento', 'Computadores'],
-    Description: 'Laboratório especializado em redes de computadores',
-    Responsible: 'Coordenação de Informática',
-    Secretary_Note: 'Laboratório para aulas práticas de redes'
-  },
-  {
-    ID_Classroom: 9,
-    Name: 'Sala de Reuniões',
-    State: 'Disponivel',
-    Capacity: 8,
-    Equipment: ['Mesa de reunião', 'Projetor', 'Quadro branco'],
-    Description: 'Sala para reuniões e apresentações',
-    Responsible: 'Direção',
-    Secretary_Note: 'Sala climatizada com equipamentos modernos'
-  },
-  {
-    ID_Classroom: 10,
-    Name: 'Auditório Pequeno',
-    State: 'Indisponivel',
-    Capacity: 50,
-    Equipment: ['Palco', 'Sistema de som', 'Projetor', 'Ar condicionado'],
-    Description: 'Auditório para palestras e eventos',
-    Responsible: 'Coordenação de Eventos',
-    Secretary_Note: 'Auditório temporariamente suspenso'
   }
 ]
 
@@ -244,6 +234,26 @@ export const updateClassroomState = async (id: number, state: Classroom['State']
     console.warn('API não disponível, usando dados mockados:', error)
     // Fallback para dados mockados
     return updateClassroomStatus(id, state)
+  }
+}
+
+// Função para atualizar nota da secretaria usando API real ou mock
+export const updateClassroomNote = async (id: number, secretaryNote: string): Promise<Classroom> => {
+  try {
+    // Tenta usar a API real primeiro
+    return await api.classrooms.updateNote(id, secretaryNote)
+  } catch (error) {
+    console.warn('API não disponível, usando dados mockados:', error)
+    // Fallback para dados mockados
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
+    const classroom = mockClassrooms.find(c => c.ID_Classroom === id)
+    if (!classroom) {
+      throw new Error('Sala não encontrada')
+    }
+    
+    classroom.Secretary_Note = secretaryNote
+    return classroom
   }
 }
 
