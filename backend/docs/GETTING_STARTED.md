@@ -22,7 +22,7 @@ cd IChaves/backend
 
 ### 2. Configure o ambiente Docker
 ```bash
-# Copie o arquivo de exemplo (opcional - Docker Compose já tem as variáveis)
+# Copie o arquivo de exemplo (opcional)
 cp .env.example .env
 
 # Edite o arquivo .env se necessário (as variáveis já estão no docker-compose.yml)
@@ -30,8 +30,8 @@ cp .env.example .env
 
 ### 3. Inicie os serviços com Docker
 ```bash
-# Inicie PostgreSQL e Backend
-docker-compose up -d
+# Inicie PostgreSQL e Backend 
+docker-compose up -d 
 
 # Execute as migrações do banco
 docker-compose exec backend npm run db:migrate
