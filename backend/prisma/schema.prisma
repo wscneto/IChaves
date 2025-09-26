@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  IDUser        Int      @id @default(autoincrement())
+  Name          String
+  Email         String   @unique
+  ImageProfile  Bytes?
+
+  // Relacionamentos
+  History       History[]
+  Notifications Notification[]
+
+  // Herança
+  Student       Student?
+  Admin         Admin?
+}
+
+model Student {
+  IDUser  Int    @id // Renomeado para maior clareza
+  Period  String
+  Course  String
+
+  // Relacionamento 1:1 com User
+  User    User   @relation(fields: [IDUser], references: [IDUser])
+}
+
+model Admin {
+  IDUser Int  @id // Renomeado para maior clareza
+
+  // Relacionamento 1:1 com User
+  User   User @relation(fields: [IDUser], references: [IDUser])
+}
+
+model Classroom {
+  IDClassroom   Int      @id @default(autoincrement())
+  Name          String
+  Responsible   String
+  Description   String
+  State         String // 'Disponivel' | 'Em uso' | 'Indisponivel'
+  SecretaryNote String?
+  Equipment     String
+  Capacity      Int
+
+  // Relacionamentos
+  Histories     History[]
+}
+
+model History {
+  IDHistory       Int      @id @default(autoincrement())
+  StartDate       DateTime @default(now())
+  ReturnDate      DateTime?
+  IDUserFK        Int
+  IDClassroomFK   Int
+
+  // Relacionamentos
+  User            User     @relation(fields: [IDUserFK], references: [IDUser])
+  Classroom       Classroom @relation(fields: [IDClassroomFK], references: [IDClassroom])
+}
+
+model Notification {
+  IDNotification Int      @id @default(autoincrement())
+  Message        String
+  CreatedAt      DateTime @default(now())
+  ReadAt         DateTime?
+  IDUserFK       Int
+
+  // Relacionamentos
+  User           User     @relation(fields: [IDUserFK], references: [IDUser])
+}

@@ -1,0 +1,47 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend project of the IChaves website",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test:server": "node scripts/test-server.js",
+    "demo:errors": "node scripts/demo-error-handling.js",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "prisma db seed"
+  },
+  "author": "Group IChaves",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "prisma": "^6.16.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@eslint/json": "^0.13.2",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.5.2",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
+    "jiti": "^2.6.0",
+    "nodemon": "^3.1.10",
+    "prettier": "3.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1"
+  },
+  "prisma": {
+    "seed": "ts-node -r dotenv/config prisma/seed.ts"
+  }
+}
