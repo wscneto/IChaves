@@ -1,11 +1,11 @@
 <template>
   <div>
-    <component :is="auth.user.role === 'admin' ? AppHeaderAdmin : AppHeaderStudent" />
+    <component :is="auth.userRole === 'admin' ? AppHeaderAdmin : AppHeaderStudent" />
     <div class="pt-[60px] sm:pt-[80px] lg:pt-[100px]">
-      <div class="p-2 sm:p-4 bg-blue-600 text-white text-center">
+      <div v-if="auth.isAuthenticated" class="p-2 sm:p-4 bg-blue-600 text-white text-center">
         <p class="text-sm sm:text-base md:text-lg font-normal">
-          Esta é a página {{ auth.user.role === 'admin' ? 'da secretaria' : 'do estudante' }}. Para acessar a página 
-          {{ auth.user.role === 'admin' ? 'do estudante' : 'da secretaria' }}, clique <span class="cursor-pointer text-yellow-400 hover:text-green-500 font-bold" @click="toggleRole">aqui.</span>
+          Esta é a página {{ auth.userRole === 'admin' ? 'da secretaria' : 'do estudante' }}. Para acessar a página 
+          {{ auth.userRole === 'admin' ? 'do estudante' : 'da secretaria' }}, clique <span class="cursor-pointer text-yellow-400 hover:text-green-500 font-bold" @click="toggleRole">aqui.</span>
         </p>
       </div>
       <slot />
@@ -23,6 +23,29 @@ import AppFooter from '@/components/AppFooter.vue'
 const auth = useAuthStore()
 
 function toggleRole() {
-  auth.setRole(auth.user.role === 'admin' ? 'student' : 'admin')
+  // Para demonstração, vamos simular a troca de papel
+  // Em produção isso seria feito através de permissões do backend
+  if (auth.userRole === 'admin') {
+    // Simular usuário estudante
+    const mockStudent = {
+      IDUser: 2,
+      Name: 'João Silva',
+      Email: 'joao@example.com',
+      Student: {
+        Course: 'Engenharia de Software',
+        Period: '5'
+      }
+    }
+    auth.setUser(mockStudent)
+  } else {
+    // Simular usuário admin
+    const mockAdmin = {
+      IDUser: 1,
+      Name: 'Admin Sistema',
+      Email: 'admin@ichaves.com',
+      Admin: {}
+    }
+    auth.setUser(mockAdmin)
+  }
 }
 </script>

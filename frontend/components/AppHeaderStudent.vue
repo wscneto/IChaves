@@ -14,10 +14,10 @@
       </div>
       <NuxtLink to="/user" class="flex items-center space-x-3">
         <span class="hidden sm:block text-gray-700 font-medium text-xl ">
-          Walter Neto
+          {{ authStore.userName }}
         </span>
         <img
-          src="https://ui-avatars.com/api/?name=Walter+Neto"
+          :src="`https://ui-avatars.com/api/?name=${encodeURIComponent(authStore.userName)}`"
           alt="User avatar"
           class="w-10 h-10 rounded-full border border-gray-300"
         />
@@ -30,9 +30,11 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import NotificationBell from '@/components/NotificationBell.vue'
 import NotificationCard from '@/components/NotificationCard.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const showCard = ref(false)
 const notificationArea = ref<HTMLElement | null>(null)
+const authStore = useAuthStore()
 
 function handleClickOutside(event: MouseEvent) {
   if (notificationArea.value && !notificationArea.value.contains(event.target as Node)) {

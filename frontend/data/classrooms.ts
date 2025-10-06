@@ -7,140 +7,143 @@ import { api } from '@/services/api'
 
 export const mockClassrooms: Classroom[] = [
   {
-    ID_Classroom: 1,
+    IDClassroom: 1,
     Name: 'Armário 01',
     State: 'Disponivel',
     Capacity: 1,
-    Equipment: [],
+    Equipment: '',
     Description: 'Armário para guardar pertences pessoais',
     Responsible: 'Secretaria',
-    Secretary_Note: 'Armário em bom estado'
+    SecretaryNote: 'Armário em bom estado'
   },
   {
-    ID_Classroom: 2,
+    IDClassroom: 2,
     Name: 'Armário 02',
     State: 'Em uso',
     Capacity: 1,
-    Equipment: [],
+    Equipment: '',
     Description: 'Armário para guardar pertences pessoais',
     Responsible: 'Secretaria',
-    Secretary_Note: 'Armário em bom estado'
+    SecretaryNote: 'Armário em bom estado'
   },
   {
-    ID_Classroom: 3,
+    IDClassroom: 3,
     Name: 'Armário 03',
     State: 'Disponivel',
     Capacity: 1,
-    Equipment: [],
+    Equipment: '',
     Description: 'Armário para guardar pertences pessoais',
     Responsible: 'Secretaria',
-    Secretary_Note: 'Armário em bom estado'
+    SecretaryNote: 'Armário em bom estado'
   },
   {
-    ID_Classroom: 4,
+    IDClassroom: 4,
     Name: 'Armário 04',
     State: 'Indisponivel',
     Capacity: 1,
-    Equipment: [],
+    Equipment: '',
     Description: 'Armário para guardar pertences pessoais',
     Responsible: 'Secretaria',
-    Secretary_Note: 'Armário em manutenção'
+    SecretaryNote: 'Armário em manutenção'
   },
   {
-    ID_Classroom: 5,
+    IDClassroom: 5,
     Name: 'Armário 05',
     State: 'Disponivel',
     Capacity: 1,
-    Equipment: [],
+    Equipment: '',
     Description: 'Armário para guardar pertences pessoais',
     Responsible: 'Secretaria',
-    Secretary_Note: 'Armário em bom estado'
+    SecretaryNote: 'Armário em bom estado'
   },
   {
-    ID_Classroom: 6,
+    IDClassroom: 6,
     Name: 'Armário 06',
     State: 'Em uso',
     Capacity: 1,
-    Equipment: [],
+    Equipment: '',
     Description: 'Armário para guardar pertences pessoais',
     Responsible: 'Secretaria',
-    Secretary_Note: 'Armário em bom estado'
+    SecretaryNote: 'Armário em bom estado'
   },
   {
-    ID_Classroom: 7,
+    IDClassroom: 7,
     Name: 'Laboratório 03',
     State: 'Disponivel',
     Capacity: 25,
-    Equipment: ['Computadores', 'Quadro Branco', 'TVs', 'Projetor'],
+    Equipment: 'Computadores, Quadro Branco, TVs, Projetor',
     Description: 'Laboratório de informática com equipamentos modernos',
     Responsible: 'Coordenação de Informática',
-    Secretary_Note: 'Equipamentos atualizados em 2024'
+    SecretaryNote: 'Equipamentos atualizados em 2024'
   },
   {
-    ID_Classroom: 8,
+    IDClassroom: 8,
     Name: 'Sala de Convivência',
     State: 'Indisponivel',
     Capacity: 10,
-    Equipment: ['Sofá', 'Cafeteira', 'Micro-ondas'],
+    Equipment: 'Sofá, Cafeteira, Micro-ondas',
     Description: 'Pequena sala para convivência dos alunos',
     Responsible: 'Coordenação',
-    Secretary_Note: 'Em manutenção - problemas no ar condicionado'
+    SecretaryNote: 'Em manutenção - problemas no ar condicionado'
   },
   {
-    ID_Classroom: 9,
+    IDClassroom: 9,
     Name: 'Sala de Estudos',
     State: 'Disponivel',
     Capacity: 15,
-    Equipment: ['Computadores', 'Mesas individuais', 'Ar condicionado'],
+    Equipment: 'Computadores, Mesas individuais, Ar condicionado',
     Description: 'Sala silenciosa para estudos individuais e em grupo',
     Responsible: 'Biblioteca',
-    Secretary_Note: 'Sala com excelente acústica'
+    SecretaryNote: 'Sala com excelente acústica'
   }
 ]
 
 export const mockUsers: User[] = [
   {
-    ID_User: 1,
+    IDUser: 1,
     Name: 'Walter Soares Costa Neto',
-    Course: 'Ciência da Computação',
-    Period: '8º Período',
-    Email: 'walter.neto@example.com',
-    Image_Profile: 'https://ui-avatars.com/api/?name=Walter+Neto'
+    Email: 'wscn@ichaves.com',
+    ImageProfile: 'https://ui-avatars.com/api/?name=Walter+Neto',
+    Student: {
+      Course: 'Ciência da Computação',
+      Period: '3'
+    }
   },
   {
-    ID_User: 2,
-    Name: 'John Wallex Kennedy',
-    Course: 'Ciência da Computação',
-    Period: '8º Período',
-    Email: 'john.kennedy@example.com',
-    Image_Profile: 'https://ui-avatars.com/api/?name=John+Kennedy'
+    IDUser: 2,
+    Name: 'Admin Sistema',
+    Email: 'admin@ichaves.com',
+    ImageProfile: 'https://ui-avatars.com/api/?name=Admin+Sistema',
+    Admin: {}
   },
   {
-    ID_User: 3,
-    Name: 'Davi William Santos',
-    Course: 'Ciência da Computação',
-    Period: '8º Período',
-    Email: 'davi.santos@example.com',
-    Image_Profile: 'https://ui-avatars.com/api/?name=Davi+Santos'
+    IDUser: 3,
+    Name: 'João Silva',
+    Email: 'joao@example.com',
+    ImageProfile: 'https://ui-avatars.com/api/?name=Joao+Silva',
+    Student: {
+      Course: 'Engenharia de Software',
+      Period: '5'
+    }
   }
 ]
 
 export const mockHistories: History[] = [
   {
-    ID_History: 1,
+    IDHistory: 1,
     StartDate: '2024-01-15T10:00:00Z',
     ReturnDate: '2024-01-15T12:00:00Z',
-    ID_User_FK: 1,
-    ID_Classroom_FK: 1,
+    IDUserFK: 1,
+    IDClassroomFK: 1,
     User: mockUsers[0],
     Classroom: mockClassrooms[0]
   },
   {
-    ID_History: 2,
+    IDHistory: 2,
     StartDate: '2024-01-16T14:00:00Z',
     ReturnDate: undefined, // Empréstimo ativo
-    ID_User_FK: 2,
-    ID_Classroom_FK: 2,
+    IDUserFK: 2,
+    IDClassroomFK: 2,
     User: mockUsers[1],
     Classroom: mockClassrooms[1]
   }
@@ -148,19 +151,19 @@ export const mockHistories: History[] = [
 
 export const mockNotifications: Notification[] = [
   {
-    ID_Notification: 1,
+    IDNotification: 1,
     Message: 'Sua chave do Armário 01 foi devolvida com sucesso',
     CreatedAt: '2024-01-15T12:05:00Z',
     ReadAt: '2024-01-15T12:10:00Z',
-    ID_User_FK: 1,
+    IDUserFK: 1,
     User: mockUsers[0]
   },
   {
-    ID_Notification: 2,
+    IDNotification: 2,
     Message: 'Lembrete: Você ainda possui a chave do Armário 02',
     CreatedAt: '2024-01-16T16:00:00Z',
     ReadAt: undefined, // Não lida
-    ID_User_FK: 2,
+    IDUserFK: 2,
     User: mockUsers[1]
   }
 ]
@@ -181,7 +184,7 @@ export const updateClassroomStatus = async (id: number, state: Classroom['State'
   // Simula delay de rede
   await new Promise(resolve => setTimeout(resolve, 300))
   
-  const classroom = mockClassrooms.find(c => c.ID_Classroom === id)
+  const classroom = mockClassrooms.find(c => c.IDClassroom === id)
   if (!classroom) {
     throw new Error('Sala não encontrada')
   }
@@ -247,12 +250,12 @@ export const updateClassroomNote = async (id: number, secretaryNote: string): Pr
     // Fallback para dados mockados
     await new Promise(resolve => setTimeout(resolve, 300))
     
-    const classroom = mockClassrooms.find(c => c.ID_Classroom === id)
+    const classroom = mockClassrooms.find(c => c.IDClassroom === id)
     if (!classroom) {
       throw new Error('Sala não encontrada')
     }
     
-    classroom.Secretary_Note = secretaryNote
+    classroom.SecretaryNote = secretaryNote
     return classroom
   }
 }
