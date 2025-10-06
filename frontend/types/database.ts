@@ -3,42 +3,46 @@
 // ===========================================
 
 export interface User {
-  ID_User: number
+  IDUser: number
   Name: string
-  Course: string
-  Period: string
   Email: string
-  Image_Profile?: string // BLOB convertido para base64 string
+  ImageProfile?: string // BLOB convertido para base64 string
+  // Relacionamentos
+  Student?: {
+    Course: string
+    Period: string
+  }
+  Admin?: Record<string, never> // Admin não tem campos extras além da relação
 }
 
 export interface Classroom {
-  ID_Classroom: number
+  IDClassroom: number
   Name: string
   Responsible: string
   Description: string
   State: 'Disponivel' | 'Em uso' | 'Indisponivel'
-  Secretary_Note?: string
-  Equipment: string[]
+  SecretaryNote?: string
+  Equipment: string
   Capacity: number
 }
 
 export interface History {
-  ID_History: number
+  IDHistory: number
   StartDate: string // ISO date string
   ReturnDate?: string // ISO date string (null se ainda não foi devolvido)
-  ID_User_FK: number
-  ID_Classroom_FK: number
+  IDUserFK: number
+  IDClassroomFK: number
   // Relacionamentos (populados pela API)
   User?: User
   Classroom?: Classroom
 }
 
 export interface Notification {
-  ID_Notification: number
+  IDNotification: number
   Message: string
   CreatedAt: string // ISO date string
   ReadAt?: string // ISO date string (null se ainda não foi lida)
-  ID_User_FK: number
+  IDUserFK: number
   // Relacionamentos (populados pela API)
   User?: User
 }
@@ -55,8 +59,8 @@ export interface CreateClassroomRequest {
   Responsible: string
   Description: string
   State: Classroom['State']
-  Secretary_Note?: string
-  Equipment: string[]
+  SecretaryNote?: string
+  Equipment: string
   Capacity: number
 }
 
@@ -65,14 +69,14 @@ export interface UpdateClassroomRequest {
   Responsible?: string
   Description?: string
   State?: Classroom['State']
-  Secretary_Note?: string
-  Equipment?: string[]
+  SecretaryNote?: string
+  Equipment?: string
   Capacity?: number
 }
 
 export interface CreateHistoryRequest {
-  ID_User_FK: number
-  ID_Classroom_FK: number
+  IDUserFK: number
+  IDClassroomFK: number
   StartDate: string
 }
 
@@ -82,7 +86,7 @@ export interface UpdateHistoryRequest {
 
 export interface CreateNotificationRequest {
   Message: string
-  ID_User_FK: number
+  IDUserFK: number
 }
 
 export interface UpdateNotificationRequest {
@@ -129,8 +133,8 @@ export interface ClassroomFilters {
 }
 
 export interface HistoryFilters {
-  ID_User_FK?: number
-  ID_Classroom_FK?: number
+  IDUserFK?: number
+  IDClassroomFK?: number
   StartDate?: {
     from?: string
     to?: string
@@ -142,7 +146,7 @@ export interface HistoryFilters {
 }
 
 export interface NotificationFilters {
-  ID_User_FK?: number
+  IDUserFK?: number
   ReadAt?: boolean // true para lidas, false para não lidas, undefined para todas
   CreatedAt?: {
     from?: string

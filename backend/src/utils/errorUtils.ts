@@ -238,7 +238,7 @@ export class AuthUtils {
    * Check if user is authenticated
    */
   static requireAuth(req: Request): void {
-    if (!(req as any).user) {
+    if (!(req as Request).user) {
       ErrorUtils.throwAuthError('Authentication required', req);
     }
   }
@@ -249,7 +249,7 @@ export class AuthUtils {
   static requireRole(role: string, req: Request): void {
     this.requireAuth(req);
     
-    if (!(req as any).user?.roles?.includes(role)) {
+    if (!(req as Request).user?.role?.includes(role)) {
       ErrorUtils.throwForbiddenError(`Role '${role}' required`, req);
     }
   }

@@ -3,21 +3,21 @@
     <!-- Search Input -->
     <div class="p-4">
       <div v-if="isLoading" class="animate-pulse">
-        <div class="h-12 bg-gray-200 rounded-xl"></div>
+        <div class="h-12 bg-gray-200 rounded-xl" />
       </div>
       <input
         v-else
+        v-model="searchQuery"
         type="text"
         placeholder="Busque uma sala..."
-        v-model="searchQuery"
         class="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none font-funnel-sans"
-      />
+      >
     </div>
 
     <!-- Loading Message -->
     <div v-if="isLoading" class="px-4 pb-2">
       <div class="animate-pulse">
-        <div class="h-4 bg-gray-200 rounded w-48"></div>
+        <div class="h-4 bg-gray-200 rounded w-48" />
       </div>
     </div>
 
@@ -32,10 +32,10 @@
       <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <ClassroomItem
           v-for="classroom in filteredClassrooms"
-          :key="classroom.ID_Classroom"
+          :key="classroom.IDClassroom"
           :classroom="classroom"
-          :user-role="authStore.user.role"
-          :is-loading="actionLoading === classroom.ID_Classroom"
+          :user-role="authStore.userRole || 'student'"
+          :is-loading="actionLoading === classroom.IDClassroom"
           @click="goToClassroom"
           @action="handleClassroomAction"
         />
@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import type { Classroom } from '@/types/database'
 import ConfirmPopUp from '@/components/ConfirmPopUp.vue'
 import ClassroomItem from '@/components/ClassroomItem.vue'
@@ -96,6 +96,79 @@ const filteredClassrooms = computed(() =>
 
 // Load classrooms on mount
 onMounted(async () => {
+  // Verificar se há parâmetro email na URL
+  const route = useRoute()
+  const email = route.query.email as string
+
+  if (!email) {
+    // Redirecionar para o site de login se não há email
+    console.warn('❌ Email não fornecido na URL, redirecionando para login externo')
+    console.log('🔄 Redirecionando em 3 segundos...')
+    setTimeout(() => {
+      window.location.href = 'https://login-externo.vercel.app/'
+    }, 3000)
+    return
+  }
+
+  // Validar formato do email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    console.error('❌ Formato de email inválido:', email)
+    console.log('🔄 Redirecionando em 3 segundos...')
+    setTimeout(() => {
+      window.location.href = 'https://login-externo.vercel.app/'
+    }, 3000)
+    return
+  }
+
+  // Tentar fazer login com o email
+  try {
+    console.log('🚀 Iniciando processo de login com email:', email)
+    
+    // Teste direto da API primeiro
+    console.log('🧪 Testando API diretamente...')
+    const testUrl = 'http://localhost:3001/api/users/email?email=' + encodeURIComponent(email)
+    console.log('🧪 URL de teste:', testUrl)
+    
+    try {
+      console.log('🧪 Fazendo fetch para:', testUrl)
+      const testResponse = await fetch(testUrl)
+      console.log('🧪 Status do teste:', testResponse.status)
+      console.log('🧪 Headers do teste:', Object.fromEntries(testResponse.headers.entries()))
+      
+      if (!testResponse.ok) {
+        console.error('🧪 ❌ Resposta não OK:', testResponse.status, testResponse.statusText)
+        const errorText = await testResponse.text()
+        console.error('🧪 ❌ Conteúdo do erro:', errorText)
+      } else {
+        const testData = await testResponse.json()
+        console.log('🧪 ✅ Dados do teste:', testData)
+        console.log('🧪 ✅ Tipo dos dados:', typeof testData)
+        console.log('🧪 ✅ Dados têm propriedade data?', 'data' in testData)
+        if (testData.data) {
+          console.log('🧪 ✅ Dados.data:', testData.data)
+        }
+      }
+    } catch (testError) {
+      console.error('🧪 ❌ Erro no teste direto:', testError)
+      console.error('🧪 ❌ Stack trace:', testError instanceof Error ? testError.stack : 'No stack')
+    }
+    
+    console.log('🔄 Agora tentando via store...')
+    await authStore.loginWithEmail(email)
+    console.log('✅ Login realizado com sucesso via store')
+  } catch (error) {
+    console.error('❌ Erro ao fazer login:', error)
+    console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack')
+    console.log('🔄 Redirecionando em 3 segundos...')
+    // Redirecionar para o site de login em caso de erro
+    setTimeout(() => {
+      window.location.href = 'https://login-externo.vercel.app/'
+    }, 3000)
+    return
+  }
+
+  // Carregar salas após login bem-sucedido
   isLoading.value = true
   try {
     // Delay mínimo para mostrar o skeleton
@@ -104,6 +177,7 @@ onMounted(async () => {
       new Promise(resolve => setTimeout(resolve, 500)) // Delay mínimo de 500ms
     ])
     classrooms.value = classroomsData
+    console.log('Salas carregadas com sucesso:', classroomsData.length)
   } catch (error) {
     console.error('Erro ao carregar salas:', error)
   } finally {
@@ -112,7 +186,7 @@ onMounted(async () => {
 })
 
 const goToClassroom = (classroom: Classroom) => {
-  router.push(`/classrooms/${classroom.ID_Classroom}`)
+  router.push(`/classrooms/${classroom.IDClassroom}`)
 }
 
 const openConfirmPopup = (title: string, message: string, action: () => void) => {
@@ -138,10 +212,10 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
         `Você tem certeza que deseja reservar a sala ${classroom.Name}?`,
         async () => {
           try {
-            actionLoading.value = classroom.ID_Classroom
-            await updateClassroomState(classroom.ID_Classroom, 'Em uso')
-            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
-            if (index !== -1) {
+            actionLoading.value = classroom.IDClassroom
+            await updateClassroomState(classroom.IDClassroom, 'Em uso')
+            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
+            if (index !== -1 && classrooms.value[index]) {
               classrooms.value[index].State = 'Em uso'
             }
           } catch (error) {
@@ -160,10 +234,10 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
         `Você tem certeza que deseja trocar a sala ${classroom.Name}?`,
         async () => {
           try {
-            actionLoading.value = classroom.ID_Classroom
-            await updateClassroomState(classroom.ID_Classroom, 'Disponivel')
-            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
-            if (index !== -1) {
+            actionLoading.value = classroom.IDClassroom
+            await updateClassroomState(classroom.IDClassroom, 'Disponivel')
+            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
+            if (index !== -1 && classrooms.value[index]) {
               classrooms.value[index].State = 'Disponivel'
             }
           } catch (error) {
@@ -182,10 +256,10 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
         `Você tem certeza que deseja solicitar a sala ${classroom.Name}?`,
         async () => {
           try {
-            actionLoading.value = classroom.ID_Classroom
-            await updateClassroomState(classroom.ID_Classroom, 'Em uso')
-            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
-            if (index !== -1) {
+            actionLoading.value = classroom.IDClassroom
+            await updateClassroomState(classroom.IDClassroom, 'Em uso')
+            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
+            if (index !== -1 && classrooms.value[index]) {
               classrooms.value[index].State = 'Em uso'
             }
           } catch (error) {
@@ -204,10 +278,10 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
         `Você tem certeza que deseja suspender a sala ${classroom.Name}?`,
         async () => {
           try {
-            actionLoading.value = classroom.ID_Classroom
-            await updateClassroomState(classroom.ID_Classroom, 'Indisponivel')
-            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
-            if (index !== -1) {
+            actionLoading.value = classroom.IDClassroom
+            await updateClassroomState(classroom.IDClassroom, 'Indisponivel')
+            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
+            if (index !== -1 && classrooms.value[index]) {
               classrooms.value[index].State = 'Indisponivel'
             }
           } catch (error) {
@@ -226,10 +300,10 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
         `Você tem certeza que deseja liberar a sala ${classroom.Name}?`,
         async () => {
           try {
-            actionLoading.value = classroom.ID_Classroom
-            await updateClassroomState(classroom.ID_Classroom, 'Disponivel')
-            const index = classrooms.value.findIndex(c => c.ID_Classroom === classroom.ID_Classroom)
-            if (index !== -1) {
+            actionLoading.value = classroom.IDClassroom
+            await updateClassroomState(classroom.IDClassroom, 'Disponivel')
+            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
+            if (index !== -1 && classrooms.value[index]) {
               classrooms.value[index].State = 'Disponivel'
             }
           } catch (error) {

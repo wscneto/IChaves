@@ -8,9 +8,9 @@ declare global {
     interface Request {
       user?: {
         id: string;
-        name?: string;
-        email?: string;
-        roles?: string[];
+        name: string;
+        email: string;
+        role: 'admin' | 'student' | null;
       };
     }
   }

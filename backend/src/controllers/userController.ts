@@ -44,6 +44,23 @@ export class UserController {
   });
 
   /**
+   * Get user by email
+   */
+  static getUserByEmail = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.query;
+
+    ValidationUtils.validateRequired(email, 'email', req);
+    ValidationUtils.validateEmail(email as string, req);
+
+    const user = await UserService.getUserByEmail(email as string);
+
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  });
+
+  /**
    * Get all users
    */
   static getAllUsers = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {

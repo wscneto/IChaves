@@ -69,6 +69,55 @@ export class UserService {
           IDUser: true,
           Name: true,
           Email: true,
+          Student: {
+            select: {
+              Course: true,
+              Period: true,
+            }
+          },
+          Admin: true,
+        }
+      });
+
+      if (!user) {
+        throw new AppError(
+          ErrorCode.RECORD_NOT_FOUND,
+          'User not found',
+          404
+        );
+      }
+
+      return user;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ErrorCode.DATABASE_ERROR,
+        'Failed to fetch user',
+        500
+      );
+    }
+  }
+
+  /**
+   * Get user by email
+   */
+  static async getUserByEmail(email: string) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { Email: email },
+        select: {
+          IDUser: true,
+          Name: true,
+          Email: true,
+          Student: {
+            select: {
+              Course: true,
+              Period: true,
+            }
+          },
+          Admin: true,
         }
       });
 
@@ -110,7 +159,7 @@ export class UserService {
       });
 
       return users;
-    } catch (error) {
+    } catch {
       throw new AppError(
         ErrorCode.DATABASE_ERROR,
         'Failed to fetch users',
