@@ -7,8 +7,6 @@ import type {
   Classroom,
   History,
   Notification,
-  CreateClassroomRequest,
-  UpdateClassroomRequest,
   CreateHistoryRequest,
   UpdateHistoryRequest,
   CreateNotificationRequest,
@@ -30,6 +28,9 @@ import type {
 
 const API_BASE_URL = process.env.NUXT_PUBLIC_API_URL || 'http://localhost:3001/api'
 
+console.log('🔧 API_BASE_URL configurada como:', API_BASE_URL)
+console.log('🔧 NUXT_PUBLIC_API_URL:', process.env.NUXT_PUBLIC_API_URL)
+
 class ApiService {
   private baseURL: string
 
@@ -42,6 +43,9 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`
+    
+    console.log('🚀 Fazendo requisição HTTP para:', url)
+    console.log('🚀 Configuração:', options)
     
     const defaultHeaders = {
       'Content-Type': 'application/json',
@@ -57,15 +61,21 @@ class ApiService {
 
     try {
       const response = await fetch(url, config)
+      console.log('📡 Status da resposta:', response.status)
+      console.log('📡 Headers da resposta:', Object.fromEntries(response.headers.entries()))
+      
       const data = await response.json()
+      console.log('📡 Dados da resposta:', data)
 
       if (!response.ok) {
+        console.error('❌ Erro HTTP:', response.status, data)
         throw new Error(data.message || `HTTP error! status: ${response.status}`)
       }
 
+      console.log('✅ Requisição bem-sucedida')
       return data
     } catch (error) {
-      console.error('API request failed:', error)
+      console.error('❌ API request failed:', error)
       throw error
     }
   }
@@ -88,6 +98,14 @@ class ApiService {
 
   async getUser(id: number): Promise<User> {
     const response = await this.request<User>(`/users/${id}`)
+    return response.data!
+  }
+
+  async getUserByEmail(email: string): Promise<User> {
+    console.log('🌐 Fazendo requisição para:', `/users/email?email=${encodeURIComponent(email)}`)
+    const response = await this.request<User>(`/users/email?email=${encodeURIComponent(email)}`)
+    console.log('🌐 Resposta completa da API:', response)
+    console.log('🌐 Dados extraídos:', response.data)
     return response.data!
   }
 
@@ -163,8 +181,8 @@ class ApiService {
 
   async getHistories(filters?: HistoryFilters, page = 1, limit = 10): Promise<PaginatedResponse<History>> {
     const params = new URLSearchParams()
-    if (filters?.ID_User_FK) params.append('user_id', filters.ID_User_FK.toString())
-    if (filters?.ID_Classroom_FK) params.append('classroom_id', filters.ID_Classroom_FK.toString())
+    if (filters?.IDUserFK) params.append('user_id', filters.IDUserFK.toString())
+    if (filters?.IDClassroomFK) params.append('classroom_id', filters.IDClassroomFK.toString())
     if (filters?.StartDate?.from) params.append('start_date_from', filters.StartDate.from)
     if (filters?.StartDate?.to) params.append('start_date_to', filters.StartDate.to)
     if (filters?.ReturnDate?.from) params.append('return_date_from', filters.ReturnDate.from)
@@ -210,7 +228,7 @@ class ApiService {
 
   async getNotifications(filters?: NotificationFilters, page = 1, limit = 10): Promise<PaginatedResponse<Notification>> {
     const params = new URLSearchParams()
-    if (filters?.ID_User_FK) params.append('user_id', filters.ID_User_FK.toString())
+    if (filters?.IDUserFK) params.append('user_id', filters.IDUserFK.toString())
     if (filters?.ReadAt !== undefined) params.append('read', filters.ReadAt.toString())
     if (filters?.CreatedAt?.from) params.append('created_at_from', filters.CreatedAt.from)
     if (filters?.CreatedAt?.to) params.append('created_at_to', filters.CreatedAt.to)
@@ -283,8 +301,8 @@ class ApiService {
     const response = await this.request<History>('/actions/borrow', {
       method: 'POST',
       body: JSON.stringify({
-        ID_User_FK: userId,
-        ID_Classroom_FK: classroomId,
+        IDUserFK: userId,
+        IDClassroomFK: classroomId,
         StartDate: new Date().toISOString(),
       }),
     })
@@ -295,8 +313,8 @@ class ApiService {
     const response = await this.request<History>('/actions/return', {
       method: 'POST',
       body: JSON.stringify({
-        ID_User_FK: userId,
-        ID_Classroom_FK: classroomId,
+        IDUserFK: userId,
+        IDClassroomFK: classroomId,
         ReturnDate: new Date().toISOString(),
       }),
     })
@@ -329,6 +347,7 @@ export const api = {
   users: {
     getAll: (filters?: UserFilters, page = 1, limit = 10) => apiService.getUsers(filters, page, limit),
     getById: (id: number) => apiService.getUser(id),
+    getByEmail: (email: string) => apiService.getUserByEmail(email),
   },
 
   // Classrooms (apenas leitura e alteração de estado/nota)
