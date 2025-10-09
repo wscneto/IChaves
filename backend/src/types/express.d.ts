@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { JwtPayload } from 'jsonwebtoken';
 
 /**
  * Extend Express Request interface to include user property
@@ -6,12 +7,7 @@ import { Request } from 'express';
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        id: string;
-        name: string;
-        email: string;
-        role: 'admin' | 'student' | null;
-      };
+      user?: string | JwtPayload ;
     }
   }
 }

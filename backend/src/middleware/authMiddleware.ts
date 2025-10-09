@@ -1,18 +1,6 @@
 import { Request, Response, NextFunction } from 'express'; // importing default objects from express
-import jwt, { JwtPayload } from 'jsonwebtoken'; // importing jwt to use the function to verify the token and JwtPayload to set the response's type
+import jwt from 'jsonwebtoken'; // importing jwt to use the function to verify the token and JwtPayload to set the response's type
 
-// using module augmentation to implement "user" in Request interface
-    // module augmentation is a technique that allow us to add "attributes" to the native class
-declare global  // This line makes the augmentation works for the whole project 
-{ 
-  namespace Express // This line specify that the change is in "Express" namespace 
-  {
-    interface Request // This line opens the Request interface 
-    {
-      user?: string | JwtPayload; // This line creates "user" attribute and defines it as string or JwtPayload
-    }
-  }
-}
 
 const JWT_SECRET = process.env.JWT_SECRET; // process.env allow us to access the environment variables
 
@@ -42,13 +30,25 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     //2. VALIDATING: time to verify if the token is valid
     const decodedPayload = jwt.verify(token, JWT_SECRET); 
 
-    // Adicionamos o payload decodificado (informações do usuário) ao objeto `req`
+    // Adding the payload to the user object
     req.user = decodedPayload;
 
     // Passa para o próximo middleware ou controller
     next();
-  } catch (error) {
-    // If the jwt.verify don't work, throws the 403 error
-    return res.status(403).json({ message: 'Acesso negado. Token inválido ou expirado.' }); //403 is the default HTTP code for this error
+  } catch (err) 
+  {
+    // Testing if it's expired
+    if (err instanceof jwt.TokenExpiredError) 
+      {
+      return res.status(403).json({ message: 'Acesso negado. Token expirado.' });
+    } 
+    else if (err instanceof jwt.JsonWebTokenError) // Testing if its invalid 
+    {
+      return res.status(403).json({ message: 'Acesso negado. Token inválido.' });
+    } else 
+    {
+      console.error("Erro na autenticação:", err);
+      return res.status(403).json({ message: 'Acesso negado. Erro na autenticação.' });
+    }
   }
 };
