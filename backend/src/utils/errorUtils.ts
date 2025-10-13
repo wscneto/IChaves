@@ -13,6 +13,19 @@ import {
   ErrorDetails 
 } from '../types/errors';
 
+// User interface for authentication
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'student' | null;
+}
+
+// Extended Request interface
+export interface AuthenticatedRequest extends Request {
+  user?: User;
+}
+
 /**
  * Utility functions for throwing errors with consistent format
  */
@@ -101,7 +114,7 @@ export class ValidationUtils {
   /**
    * Validate required field
    */
-  static validateRequired(value: any, fieldName: string, req?: Request): void {
+  static validateRequired(value: unknown, fieldName: string, req?: Request): void {
     if (value === undefined || value === null || value === '') {
       ErrorUtils.throwValidationError(
         `${fieldName} is required`,
@@ -162,7 +175,7 @@ export class ValidationUtils {
   /**
    * Validate array length
    */
-  static validateArrayLength(value: any[], fieldName: string, min: number, max: number, req?: Request): void {
+  static validateArrayLength(value: unknown[], fieldName: string, min: number, max: number, req?: Request): void {
     if (value.length < min) {
       ErrorUtils.throwValidationError(
         `${fieldName} must contain at least ${min} items`,
@@ -175,6 +188,33 @@ export class ValidationUtils {
       ErrorUtils.throwValidationError(
         `${fieldName} must contain no more than ${max} items`,
         { field: fieldName, value: value.length, expected: `maximum ${max} items` },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate classroom capacity (positive number)
+   */
+  static validateCapacity(capacity: number, req?: Request): void {
+    if (!Number.isInteger(capacity) || capacity <= 0) {
+      ErrorUtils.throwValidationError(
+        'Capacity must be a positive integer',
+        { field: 'Capacity', value: capacity, expected: 'positive integer' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate classroom state
+   */
+  static validateState(state: string, req?: Request): void {
+    const validStates = ['Disponivel', 'Em uso', 'Indisponivel'];
+    if (!validStates.includes(state)) {
+      ErrorUtils.throwValidationError(
+        `State must be one of: ${validStates.join(', ')}`,
+        { field: 'State', value: state, expected: validStates },
         req
       );
     }
@@ -237,8 +277,8 @@ export class AuthUtils {
   /**
    * Check if user is authenticated
    */
-  static requireAuth(req: Request): void {
-    if (!(req as Request).user) {
+  static requireAuth(req: AuthenticatedRequest): void {
+    if (!req.user) {
       ErrorUtils.throwAuthError('Authentication required', req);
     }
   }
@@ -246,10 +286,10 @@ export class AuthUtils {
   /**
    * Check if user has specific role
    */
-  static requireRole(role: string, req: Request): void {
+  static requireRole(role: string, req: AuthenticatedRequest): void {
     this.requireAuth(req);
     
-    if (!(req as Request).user?.role?.includes(role)) {
+    if (!req.user?.role?.includes(role)) {
       ErrorUtils.throwForbiddenError(`Role '${role}' required`, req);
     }
   }
@@ -257,7 +297,7 @@ export class AuthUtils {
   /**
    * Check if user owns resource
    */
-  static requireOwnership(userId: string, resourceUserId: string, req: Request): void {
+  static requireOwnership(userId: string, resourceUserId: string, req: AuthenticatedRequest): void {
     this.requireAuth(req);
     
     if (userId !== resourceUserId) {
