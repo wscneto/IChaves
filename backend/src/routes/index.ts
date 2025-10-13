@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import examplesRouter from './examples';
 import usersRouter from './users';
+import classroomsRouter from './classrooms';
 
 /**
  * Main router that aggregates all route modules
@@ -14,9 +15,10 @@ const router = Router();
 router.use('/examples', examplesRouter);
 // Example routes
 router.use('/users', usersRouter);
+// Classroom routes
+router.use('/classrooms', classroomsRouter);
 
 // Add more route modules here as they are created
-// router.use('/classrooms', classroomsRouter);
 // router.use('/notifications', notificationsRouter);
 
 export default router;
