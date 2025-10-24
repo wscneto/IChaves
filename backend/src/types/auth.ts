@@ -14,14 +14,18 @@ export interface LoginRequest
 {
     name: string;
     email: string;
+    adminData?: Admin;
+    studentData?: Student;
 } 
 
 export interface LoginResponse 
 {
     success: boolean;    
-    user: User;
-    token: string;
     message: string;
+    data: {           
+      user: User;  
+      token: string;
+    };
 }
 
 export interface User
