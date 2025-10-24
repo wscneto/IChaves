@@ -1,7 +1,7 @@
 
 export interface Admin 
 {
-    something: null
+    isAdmin: boolean;
 }
 
 export interface Student
@@ -21,6 +21,7 @@ export interface LoginResponse
     success: boolean;    
     user: User;
     token: string;
+    message: string;
 }
 
 export interface User
