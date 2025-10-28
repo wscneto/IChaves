@@ -219,6 +219,155 @@ export class ValidationUtils {
       );
     }
   }
+
+  /**
+   * Validate action type
+   */
+  static validateActionType(actionType: string, req?: Request): void {
+    const validActions = ['reservar', 'trocar', 'devolver', 'solicitar', 'suspender', 'liberar'];
+    if (!validActions.includes(actionType)) {
+      ErrorUtils.throwValidationError(
+        `Action type must be one of: ${validActions.join(', ')}`,
+        { field: 'ActionType', value: actionType, expected: validActions },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate user role
+   */
+  static validateUserRole(role: string, req?: Request): void {
+    const validRoles = ['admin', 'student'];
+    if (!validRoles.includes(role)) {
+      ErrorUtils.throwValidationError(
+        `User role must be one of: ${validRoles.join(', ')}`,
+        { field: 'Role', value: role, expected: validRoles },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate classroom ID
+   */
+  static validateClassroomID(classroomID: number, req?: Request): void {
+    if (!Number.isInteger(classroomID) || classroomID <= 0) {
+      ErrorUtils.throwValidationError(
+        'Classroom ID must be a positive integer',
+        { field: 'IDClassroomFK', value: classroomID, expected: 'positive integer' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate user ID
+   */
+  static validateUserID(userID: number, req?: Request): void {
+    if (!Number.isInteger(userID) || userID <= 0) {
+      ErrorUtils.throwValidationError(
+        'User ID must be a positive integer',
+        { field: 'UserID', value: userID, expected: 'positive integer' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate target user ID for transfer actions
+   */
+  static validateTargetUserID(targetUserID: number, req?: Request): void {
+    if (!Number.isInteger(targetUserID) || targetUserID <= 0) {
+      ErrorUtils.throwValidationError(
+        'Target user ID must be a positive integer',
+        { field: 'TargetUserID', value: targetUserID, expected: 'positive integer' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate suspension reason
+   */
+  static validateSuspensionReason(reason: string, req?: Request): void {
+    if (!reason || typeof reason !== 'string') {
+      ErrorUtils.throwValidationError(
+        'Suspension reason is required',
+        { field: 'Reason', value: reason, expected: 'non-empty string' },
+        req
+      );
+    }
+    
+    if (reason.length < 5) {
+      ErrorUtils.throwValidationError(
+        'Suspension reason must be at least 5 characters long',
+        { field: 'Reason', value: reason, expected: 'minimum 5 characters' },
+        req
+      );
+    }
+    
+    if (reason.length > 200) {
+      ErrorUtils.throwValidationError(
+        'Suspension reason must be no more than 200 characters long',
+        { field: 'Reason', value: reason, expected: 'maximum 200 characters' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate notes field
+   */
+  static validateNotes(notes: string | undefined, fieldName: string = 'Notes', req?: Request): void {
+    if (notes !== undefined) {
+      if (typeof notes !== 'string') {
+        ErrorUtils.throwValidationError(
+          `${fieldName} must be a string`,
+          { field: fieldName, value: notes, expected: 'string' },
+          req
+        );
+      }
+      
+      if (notes.length > 500) {
+        ErrorUtils.throwValidationError(
+          `${fieldName} must be no more than 500 characters long`,
+          { field: fieldName, value: notes, expected: 'maximum 500 characters' },
+          req
+        );
+      }
+    }
+  }
+
+  /**
+   * Validate action request data based on action type
+   */
+  static validateActionRequest(actionType: string, data: Record<string, unknown>, req?: Request): void {
+    this.validateActionType(actionType, req);
+    
+    // Common validations
+    if (typeof data.IDClassroomFK === 'number') {
+      this.validateClassroomID(data.IDClassroomFK, req);
+    }
+    if (typeof data.Notes === 'string' || data.Notes === undefined) {
+      this.validateNotes(data.Notes, 'Notes', req);
+    }
+    
+    // Action-specific validations
+    switch (actionType) {
+      case 'trocar':
+      case 'solicitar':
+        if (typeof data.TargetUserID === 'number') {
+          this.validateTargetUserID(data.TargetUserID, req);
+        }
+        break;
+      case 'suspender':
+        if (typeof data.Reason === 'string') {
+          this.validateSuspensionReason(data.Reason, req);
+        }
+        break;
+    }
+  }
 }
 
 /**
