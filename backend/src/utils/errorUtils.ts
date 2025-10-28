@@ -12,6 +12,7 @@ import {
   ErrorCode,
   ErrorDetails 
 } from '../types/errors';
+import { PrismaClient } from '@prisma/client';
 
 // User interface for authentication
 export interface User {
@@ -25,6 +26,9 @@ export interface User {
 export interface AuthenticatedRequest extends Request {
   user?: User;
 }
+
+//criei pra verificar se o usuario existe no BD
+const prisma = new PrismaClient();
 
 /**
  * Utility functions for throwing errors with consistent format
@@ -218,6 +222,22 @@ export class ValidationUtils {
         req
       );
     }
+  }
+
+  //validate if user exists
+
+  static async  validateUserExists(IDUserFK:string, req?: Request) {
+    const user = await prisma.user.findUnique({
+      where: { IDUser: parseInt(IDUserFK) },
+      select: { IDUser: true }
+    });
+
+    if (!user) {
+      ErrorUtils.throwValidationError(
+        'User not found',
+      );
+    }
+
   }
 }
 
