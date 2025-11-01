@@ -2,7 +2,7 @@ import { Router } from 'express';
 import examplesRouter from './examples';
 import usersRouter from './users';
 import classroomsRouter from './classrooms';
-import histories from './histories';
+import historiesRouter from './histories';
 
 
 /**
@@ -12,18 +12,13 @@ import histories from './histories';
 
 const router = Router();
 
-// API Routes - Add your route modules here
-// Errors
+// API Routes
 router.use('/examples', examplesRouter);
-// Example routes
 router.use('/users', usersRouter);
-// Classroom routes
 router.use('/classrooms', classroomsRouter);
+router.use('/histories', historiesRouter);
 
 // Add more route modules here as they are created
 // router.use('/notifications', notificationsRouter);
-
-
-router.use('/histories', histories);
 
 export default router;

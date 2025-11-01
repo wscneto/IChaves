@@ -1,42 +1,59 @@
 import { Request, Response } from 'express';
 import { ErrorHandler } from '../middleware/errorHandler';
 import { HistoryService } from '../services/historyService';
-import { HistoryQueryParams } from '../types/history';
-import { ErrorUtils } from '../utils/errorUtils';
+import { ValidationUtils } from '../utils/errorUtils';
+import { CreateHistoryData, UpdateHistoryData, HistoryQueryParams } from '../types/history';
 
 export class HistoryController {
-  static createHistory = ErrorHandler.asyncHandler(
-    async (req: Request, res: Response) => {
-      const history = await HistoryService.createHistory(req.body);
-      res.status(201).json(history);
-    },
-  );
+  static createHistory = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+    const { IDUserFK, IDClassroomFK } = req.body;
 
-  static getAllHistories = ErrorHandler.asyncHandler(
-    async (req: Request, res: Response) => {
-      const histories = await HistoryService.getAllHistories(
-        req.query as unknown as HistoryQueryParams,
-      );
-      res.status(200).json(histories);
-    },
-  );
+    ValidationUtils.validateRequired(IDUserFK, 'IDUserFK', req);
+    ValidationUtils.validateRequired(IDClassroomFK, 'IDClassroomFK', req);
 
-  static getHistoryById = ErrorHandler.asyncHandler(
-    async (req: Request, res: Response) => {
-      const { id } = req.params;
-      const history = await HistoryService.getHistoryById(id);
-      if (!history) {
-        ErrorUtils.throwNotFoundError('History not found', req);
-      }
-      res.status(200).json(history);
-    },
-  );
+    const historyData: CreateHistoryData = { IDUserFK, IDClassroomFK };
+    const history = await HistoryService.createHistory(historyData);
 
-  static updateHistory = ErrorHandler.asyncHandler(
-    async (req: Request, res: Response) => {
-      const { id } = req.params;
-      const updatedHistory = await HistoryService.updateHistory(id, req.body);
-      res.status(200).json(updatedHistory);
-    },
-  );
+    res.status(201).json({
+      success: true,
+      data: history,
+      message: 'History created successfully',
+    });
+  });
+
+  static getAllHistories = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+    const filters: HistoryQueryParams = req.query;
+    const histories = await HistoryService.getAllHistories(filters);
+
+    res.status(200).json({
+      success: true,
+      ...histories,
+    });
+  });
+
+  static getHistoryById = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    ValidationUtils.validateRequired(id, 'id', req);
+
+    const history = await HistoryService.getHistoryById(id);
+
+    res.status(200).json({
+      success: true,
+      data: history,
+    });
+  });
+
+  static updateHistory = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    ValidationUtils.validateRequired(id, 'id', req);
+
+    const historyData: UpdateHistoryData = req.body;
+    const history = await HistoryService.updateHistory(id, historyData);
+
+    res.status(200).json({
+      success: true,
+      data: history,
+      message: 'History updated successfully',
+    });
+  });
 }
