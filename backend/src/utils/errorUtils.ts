@@ -12,6 +12,9 @@ import {
   ErrorCode,
   ErrorDetails 
 } from '../types/errors';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // User interface for authentication
 export interface User {
@@ -215,6 +218,57 @@ export class ValidationUtils {
       ErrorUtils.throwValidationError(
         `State must be one of: ${validStates.join(', ')}`,
         { field: 'State', value: state, expected: validStates },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate if user exists
+   */
+  static async validateUserExists(userId: number, req?: Request): Promise<void> {
+    const user = await prisma.user.findUnique({ where: { IDUser: userId } });
+    if (!user) {
+      ErrorUtils.throwNotFoundError('User not found', req);
+    }
+  }
+
+  /**
+   * Validate if classroom exists
+   */
+  static async validateClassroomExists(classroomId: number, req?: Request): Promise<void> {
+    const classroom = await prisma.classroom.findUnique({ where: { IDClassroom: classroomId } });
+    if (!classroom) {
+      ErrorUtils.throwNotFoundError('Classroom not found', req);
+    }
+  }
+
+  /**
+   * Validate date format (ISO 8601)
+   */
+  static validateDate(date: string, fieldName: string, req?: Request): void {
+    const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+    if (!iso8601Regex.test(date)) {
+      ErrorUtils.throwValidationError(
+        `Invalid date format for ${fieldName}. Expected ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)`,
+        { field: fieldName, value: date, expected: 'ISO 8601 format' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate date range (end date > start date)
+   */
+  static validateDateRange(startDate: string, endDate: string, req?: Request): void {
+    if (new Date(endDate) <= new Date(startDate)) {
+      ErrorUtils.throwValidationError(
+        'End date must be after start date',
+        { 
+          field: 'ReturnDate', 
+          value: endDate, 
+          expected: `> ${startDate}` 
+        },
         req
       );
     }

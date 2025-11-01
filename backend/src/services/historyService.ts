@@ -7,18 +7,6 @@ const prisma = new PrismaClient();
 
 export class HistoryService {
   static async createHistory(historyData: CreateHistoryData) {
-    const { IDUserFK, IDClassroomFK } = historyData;
-
-    const user = await prisma.user.findUnique({ where: { IDUser: IDUserFK } });
-    if (!user) {
-      throw new AppError(ErrorCode.RECORD_NOT_FOUND, 'User not found', 404);
-    }
-
-    const classroom = await prisma.classroom.findUnique({ where: { IDClassroom: IDClassroomFK } });
-    if (!classroom) {
-      throw new AppError(ErrorCode.RECORD_NOT_FOUND, 'Classroom not found', 404);
-    }
-
     try {
       const newHistory = await prisma.history.create({
         data: {
@@ -112,23 +100,6 @@ export class HistoryService {
   }
 
   static async updateHistory(id: string, historyData: UpdateHistoryData) {
-    const { IDUserFK, IDClassroomFK, ReturnDate } = historyData;
-
-    if (IDUserFK) {
-        const user = await prisma.user.findUnique({ where: { IDUser: IDUserFK } });
-        if (!user) {
-            throw new AppError(ErrorCode.RECORD_NOT_FOUND, 'User not found', 404);
-        }
-    }
-    
-    if (IDClassroomFK) {
-        const classroom = await prisma.classroom.findUnique({ where: { IDClassroom: IDClassroomFK } });
-        if (!classroom) {
-            throw new AppError(ErrorCode.RECORD_NOT_FOUND, 'Classroom not found', 404);
-        }
-    }
-
-  
     try {
       const updatedHistory = await prisma.history.update({
         where: { IDHistory: parseInt(id) },

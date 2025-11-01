@@ -10,6 +10,8 @@ export class HistoryController {
 
     ValidationUtils.validateRequired(IDUserFK, 'IDUserFK', req);
     ValidationUtils.validateRequired(IDClassroomFK, 'IDClassroomFK', req);
+    await ValidationUtils.validateUserExists(IDUserFK, req);
+    await ValidationUtils.validateClassroomExists(IDClassroomFK, req);
 
     const historyData: CreateHistoryData = { IDUserFK, IDClassroomFK };
     const history = await HistoryService.createHistory(historyData);
@@ -46,6 +48,14 @@ export class HistoryController {
   static updateHistory = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     ValidationUtils.validateRequired(id, 'id', req);
+
+    const { IDUserFK, IDClassroomFK, StartDate, ReturnDate } = req.body;
+
+    if (IDUserFK) await ValidationUtils.validateUserExists(IDUserFK, req);
+    if (IDClassroomFK) await ValidationUtils.validateClassroomExists(IDClassroomFK, req);
+    if (StartDate) ValidationUtils.validateDate(StartDate, 'StartDate', req);
+    if (ReturnDate) ValidationUtils.validateDate(ReturnDate, 'ReturnDate', req);
+    if (StartDate && ReturnDate) ValidationUtils.validateDateRange(StartDate, ReturnDate, req);
 
     const historyData: UpdateHistoryData = req.body;
     const history = await HistoryService.updateHistory(id, historyData);
