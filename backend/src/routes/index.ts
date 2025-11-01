@@ -2,6 +2,7 @@ import { Router } from 'express';
 import examplesRouter from './examples';
 import usersRouter from './users';
 import classroomsRouter from './classrooms';
+import {router as AuthRouter} from './auth';
 
 /**
  * Main router that aggregates all route modules
@@ -17,6 +18,8 @@ router.use('/examples', examplesRouter);
 router.use('/users', usersRouter);
 // Classroom routes
 router.use('/classrooms', classroomsRouter);
+// Auth routes
+router.use('/auth', AuthRouter);
 
 // Add more route modules here as they are created
 // router.use('/notifications', notificationsRouter);
