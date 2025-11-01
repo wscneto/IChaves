@@ -2,6 +2,8 @@ import { Router } from 'express';
 import examplesRouter from './examples';
 import usersRouter from './users';
 import classroomsRouter from './classrooms';
+import histories from './histories';
+
 
 /**
  * Main router that aggregates all route modules
@@ -20,5 +22,8 @@ router.use('/classrooms', classroomsRouter);
 
 // Add more route modules here as they are created
 // router.use('/notifications', notificationsRouter);
+
+
+router.use('/histories', histories);
 
 export default router;
