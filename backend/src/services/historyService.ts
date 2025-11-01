@@ -78,10 +78,10 @@ export class HistoryService {
 
     if (user_id) where.IDUserFK = user_id;
     if (classroom_id) where.IDClassroomFK = classroom_id;
-    if (start_date_from) where.StartDate = { ...where.StartDate, gte: new Date(start_date_from) };
-    if (start_date_to) where.StartDate = { ...where.StartDate, lte: new Date(start_date_to) };
-    if (return_date_from) where.ReturnDate = { ...where.ReturnDate, gte: new Date(return_date_from) };
-    if (return_date_to) where.ReturnDate = { ...where.ReturnDate, lte: new Date(return_date_to) };
+    if (start_date_from) where.StartDate = {gte: new Date(start_date_from) };
+    if (start_date_to) where.StartDate = {lte: new Date(start_date_to) };
+    if (return_date_from) where.ReturnDate = {gte: new Date(return_date_from) };
+    if (return_date_to) where.ReturnDate = {lte: new Date(return_date_to) };
     if (is_active !== undefined) where.ReturnDate = is_active ? null : { not: null };
     
     try {
@@ -112,7 +112,7 @@ export class HistoryService {
   }
 
   static async updateHistory(id: string, historyData: UpdateHistoryData) {
-    const { IDUserFK, IDClassroomFK, StartDate, ReturnDate } = historyData;
+    const { IDUserFK, IDClassroomFK, ReturnDate } = historyData;
 
     if (IDUserFK) {
         const user = await prisma.user.findUnique({ where: { IDUser: IDUserFK } });
@@ -128,10 +128,7 @@ export class HistoryService {
         }
     }
 
-    if (StartDate && ReturnDate && new Date(ReturnDate) < new Date(StartDate)) {
-        throw new AppError(ErrorCode.VALIDATION_ERROR, 'ReturnDate cannot be earlier than StartDate', 400);
-    }
-
+  
     try {
       const updatedHistory = await prisma.history.update({
         where: { IDHistory: parseInt(id) },
