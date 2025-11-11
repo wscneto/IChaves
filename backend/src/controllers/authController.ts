@@ -1,76 +1,61 @@
+
+// IMPORTAMOS AS FERRAMENTAS
 import { Request, Response } from 'express';
-import { ErrorHandler } from '../middleware/errorHandler'; // Assumindo que você tem este arquivo
-import { ValidationUtils, AuthenticatedRequest } from '../utils/errorUtils'; // Assumindo que você tem este arquivo
-import { AuthService } from '../services/authService';
-import { LoginRequest } from '../types/authTypes'; //
+import { ErrorHandler } from '../middleware/errorHandler'; 
+import { JwtPayload } from 'jsonwebtoken';
+import { ValidationUtils } from '../utils/errorUtils'; 
+import { AuthService } from '../services/authservice'; 
+import { LoginRequest, MeResponse } from '../types/auth';
 
 export class AuthController {
 
-  /**
-   * Endpoint: POST /auth/login
-   * Recebe credenciais, chama o AuthService para logar/registrar
-   * e retorna o token JWT.
-   */
-  static login = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-    const { email, name, curso, periodo } = req.body;
+    /**
+     * Lida com a requisição de login
+     */
+    static login = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+        // 'req.body' é o JSON que o frontend enviou
+        const { name, email, adminData, studentData } = req.body;
 
-    // 1. Validação de Entrada
-    ValidationUtils.validateRequired(email, 'Email', req);
-    ValidationUtils.validateEmail(email, req);
-    ValidationUtils.validateRequired(name, 'Name', req);
+        // Usamos o "validador" para checar se os campos obrigatórios vieram
+        ValidationUtils.validateRequired(name, 'name', req);
+        ValidationUtils.validateRequired(email, 'email', req);
+        ValidationUtils.validateEmail(email, req);
 
-    const loginData: LoginRequest = { email, name, curso, periodo }; //
+        // Montamos o objeto no formato que o "contrato" LoginRequest pede
+        const loginData: LoginRequest = {
+            name,
+            email,
+            adminData,
+            studentData
+        };
 
-    // 2. Chamar o Serviço
-    const token = await AuthService.login(loginData);
-
-    // 3. Responder
-    res.status(200).json({
-      success: true,
-      message: 'Login bem-sucedido.',
-      token: token
+        // Chamamos o 'AuthService' e esperamos a resposta
+        const response = await AuthService.login(loginData);
+        // Enviamos o JSON de volta para o frontend
+        res.status(200).json(response);
     });
-  });
 
-  /**
-   * Endpoint: GET /auth/me
-   * Usa o ID do usuário (anexado pelo AuthMiddleware) para
-   * buscar e retornar os dados atualizados do usuário.
-   */
-  static me = ErrorHandler.asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    // 1. O 'req.user' foi anexado pelo AuthMiddleware
-    // O tipo 'User' (payload) que definimos tem a prop 'id'
-    const userId = req.user?.id;
+    /**
+     * Lida com a requisição de "quem sou eu" (/me)
+     */
+    static me = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+        
+        const userId = (req.user as JwtPayload)?.sub;
 
-    if (!userId) {
-      // Isso não deve acontecer se o middleware estiver correto
-      ValidationUtils.throwAuthError('Token inválido não contém ID de usuário.', req);
-    }
+        // Se o 'userId' não estiver ali, algo deu muito errado
+        ValidationUtils.validateRequired(userId, 'userId (from token)', req);
 
-    // 2. Chamar o Serviço
-    const user = await AuthService.me(userId as string);
+        // Chamamos o método 'me' que acabamos de criar no AuthService
+        const user = await AuthService.me(userId as string);
 
-    // 3. Responder
-    res.status(200).json({
-      success: true,
-      data: user
+        // Montamos a resposta seguindo o "contrato" MeResponse
+        const response: MeResponse = {
+            success: true,
+            data: user
+        };
+
+        // Enviamos o JSON de volta para o frontend
+        res.status(200).json(response);
     });
-  });
 
-  /**
-   * Endpoint: POST /auth/logout
-   * Registra o logout no lado do servidor (atualmente stateless).
-   */
-  static logout = ErrorHandler.asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.id;
-
-    if (userId) {
-      await AuthService.logout(userId as string);
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Logout bem-sucedido. Por favor, remova seu token do cliente.'
-    });
-  });
 }

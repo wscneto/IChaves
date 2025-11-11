@@ -1,6 +1,5 @@
-import { PrismaClient, User as PrismaUser, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { AppError, ErrorCode } from '../types/errors';
-import { UserCreationData } from '../types/authTypes';
 
 const prisma = new PrismaClient();
 
@@ -12,12 +11,6 @@ export interface CreateUserData {
 export interface UpdateUserData {
   Name?: string;
   Email?: string;
-}
-
-// Este é o tipo que o Prisma retorna quando usamos 'include'
-type FullPrismaUser = PrismaUser & {
-  Student: { Course: string, Period: string } | null;
-  Admin: true | null; 
 }
 
 export class UserService {
@@ -252,78 +245,4 @@ export class UserService {
       );
     }
   }
-
-  /**
-   * Encontra um usuário pelo email. Se não existir, cria um novo
-   * com as relações corretas (Admin ou Student).
-   */
-  static async findOrCreateUserByEmail(data: UserCreationData): Promise<FullPrismaUser> 
-  {
-    try 
-    {
-      // Tenta encontrar o usuário primeiro
-      const existingUser = await prisma.user.findUnique({
-        where: { Email: data.Email },
-        include: {
-          Student: true, // Inclui dados de estudante, se houver
-          Admin: true,   // Inclui dados de admin, se houver
-        }
-      });
-
-      // CORREÇÃO 2: Se o usuário existe, retorne o objeto completo do Prisma
-      if (existingUser) 
-      {
-        // O AuthService precisa do objeto real para pegar o ID e o 'role'
-        return existingUser as FullPrismaUser;
-      }
-
-      // Se não existe, CRIA O USUÁRIO com as relações corretas
-      
-      // CORREÇÃO 3: O tipo aqui NÃO é JwtPayload.
-      // Usamos 'any' para simplificar a adição de propriedades dinâmicas.
-      const userCreationPayload: Prisma.UserCreateInput = {
-        Name: data.Name,
-        Email: data.Email,
-      };
-
-      // Adiciona a lógica de criação da relação
-      if (data.StudentData) {
-        // Lógica para criar um ALUNO
-        userCreationPayload.Student = {
-          create: {
-            Course: data.StudentData.Course,
-            Period: data.StudentData.Period,
-          }
-        };
-      } else {
-        // Lógica para criar um ADMIN
-        userCreationPayload.Admin = {
-          create: {} // Cria a relação de Admin
-        };
-      }
-
-      // Cria o usuário e retorna o objeto completo
-      const newUser = await prisma.user.create({
-        data: userCreationPayload, // Agora 'data' está correto
-        include: {
-          Student: true,
-          Admin: true,
-        }
-      });
-
-      // CORREÇÃO 4: Retorna o novo usuário (que é do mesmo tipo que 'existingUser')
-      return newUser as FullPrismaUser;
-
-    } catch (error) 
-    {
-      // Logar o erro real pode ajudar no debug
-      console.error("Erro em findOrCreateUserByEmail:", error);
-      throw new AppError(
-        ErrorCode.DATABASE_ERROR,
-        'Falha ao encontrar ou criar usuário',
-        500
-      );
-    }
-  }
-
 }
