@@ -1,10 +1,24 @@
 import { Router } from 'express';
 import { ActionController } from '../controllers/actionController';
+<<<<<<< Updated upstream
+
+=======
 import { AuthMiddleware } from '../middleware/auth'
+>>>>>>> Stashed changes
 /**
  * Actions router
  * Handles all action-related endpoints for classroom key management
  * 
+<<<<<<< Updated upstream
+ * Available actions:
+ * - reservar: Student reserves key from administration
+ * - trocar: Student exchanges key with another student
+ * - devolver: Student returns key to administration
+ * - solicitar: Admin requests key for student
+ * - suspender: Admin suspends key
+ * - liberar: Admin releases key
+ */
+=======
  * Student actions:
  * - reservar: Student reserves key from administration (Disponivel -> Em uso)
  * - trocar: Student exchanges key with another student (Em uso -> Em uso)
@@ -22,10 +36,19 @@ if (!JWT_SECRET) {
 }
 
 const authMiddleware = new AuthMiddleware(JWT_SECRET)
+>>>>>>> Stashed changes
 
 const router = Router();
 
 // Action endpoints
+<<<<<<< Updated upstream
+router.post('/reservar', ActionController.reservar);
+router.post('/trocar', ActionController.trocar);
+router.post('/devolver', ActionController.devolver);
+router.post('/solicitar', ActionController.solicitar);
+router.post('/suspender', ActionController.suspender);
+router.post('/liberar', ActionController.liberar);
+=======
 router.post('/reservar', authMiddleware.authenticate, authMiddleware.requireStudent, ActionController.reservar)
 router.post('/trocar', authMiddleware.authenticate, authMiddleware.requireStudent, ActionController.trocar)
 router.post('/devolver', authMiddleware.authenticate, authMiddleware.requireStudent, ActionController.devolver)
@@ -51,12 +74,21 @@ router.post(
     ActionController.processKeyRequest,
 )
 router.post('/process-trade', authMiddleware.authenticate, authMiddleware.requireStudent, ActionController.processTrade)
+>>>>>>> Stashed changes
 
 // Utility endpoints
 router.get('/permissions', ActionController.getPermissions);
 router.get('/classroom/:id/state', ActionController.getClassroomStateValidation);
 router.get('/user/:id/permissions', ActionController.getUserPermissions);
+<<<<<<< Updated upstream
+
+export default router;
+
+
+
+=======
 router.get('/debug/users', ActionController.debugUsers);
 
 export default router;
 
+>>>>>>> Stashed changes
