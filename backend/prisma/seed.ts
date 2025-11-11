@@ -12,7 +12,7 @@ async function main() {
       Email: 'admin@ichaves.com',
     },
     update: {
-      Name: 'Admin Sistema',
+      Name: 'Secretaria',
       // Atualiza o registro 'Admin' relacionado a este usuário
       Admin: {
         upsert: {
@@ -22,7 +22,7 @@ async function main() {
       },
     },
     create: {
-      Name: 'Admin Sistema',
+      Name: 'Secretaria',
       Email: 'admin@ichaves.com',
       // Cria o registro 'Admin' relacionado a este usuário
       Admin: {
@@ -83,11 +83,11 @@ async function main() {
       Student: {
         upsert: {
           create: {
-            Course: 'Engenharia da Computação',
+            Course: 'Engenharia de Computação',
             Period: '5',
           },
           update: {
-            Course: 'Engenharia da Computação',
+            Course: 'Engenharia de Computação',
             Period: '5',
           },
         },
@@ -98,7 +98,7 @@ async function main() {
       Email: 'joao@example.com',
       Student: {
         create: {
-          Course: 'Engenharia da Computação',
+          Course: 'Engenharia de Computação',
           Period: '5',
         },
       },
@@ -111,87 +111,96 @@ async function main() {
 
   // Criar ou atualizar salas baseadas nos dados do frontend
   const classrooms = [
-    {
-      Name: 'Armário 01',
-      Responsible: 'Secretaria',
-      Description: 'Armário para guardar pertences pessoais',
-      State: 'Disponivel',
-      SecretaryNote: 'Armário em bom estado',
-      Equipment: '',
-      Capacity: 1,
-    },
-    {
-      Name: 'Armário 02',
-      Responsible: 'Secretaria',
-      Description: 'Armário para guardar pertences pessoais',
-      State: 'Em uso',
-      SecretaryNote: 'Armário em bom estado',
-      Equipment: '',
-      Capacity: 1,
-    },
-    {
-      Name: 'Armário 03',
-      Responsible: 'Secretaria',
-      Description: 'Armário para guardar pertences pessoais',
-      State: 'Disponivel',
-      SecretaryNote: 'Armário em bom estado',
-      Equipment: '',
-      Capacity: 1,
-    },
-    {
-      Name: 'Armário 04',
-      Responsible: 'Secretaria',
-      Description: 'Armário para guardar pertences pessoais',
-      State: 'Indisponivel',
-      SecretaryNote: 'Armário em manutenção',
-      Equipment: '',
-      Capacity: 1,
-    },
-    {
-      Name: 'Armário 05',
-      Responsible: 'Secretaria',
-      Description: 'Armário para guardar pertences pessoais',
-      State: 'Disponivel',
-      SecretaryNote: 'Armário em bom estado',
-      Equipment: '',
-      Capacity: 1,
-    },
-    {
-      Name: 'Armário 06',
-      Responsible: 'Secretaria',
-      Description: 'Armário para guardar pertences pessoais',
-      State: 'Em uso',
-      SecretaryNote: 'Armário em bom estado',
-      Equipment: '',
-      Capacity: 1,
-    },
-    {
-      Name: 'Laboratório 03',
-      Responsible: 'Secretaria',
-      Description: 'Laboratório de informática com equipamentos modernos',
-      State: 'Disponivel',
-      SecretaryNote: 'Equipamentos atualizados em 2024',
-      Equipment: 'Computadores, Quadro Branco, TVs, Projetor',
-      Capacity: 25,
-    },
-    {
-      Name: 'Sala de Convivência',
-      Responsible: 'Secretaria',
-      Description: 'Pequena sala para convivência dos alunos',
-      State: 'Indisponivel',
-      SecretaryNote: 'Em manutenção - problemas no ar condicionado',
-      Equipment: 'Sofá, Cafeteira, Micro-ondas',
-      Capacity: 10,
-    },
-    {
-      Name: 'Sala de Estudos',
-      Responsible: 'Secretaria',
-      Description: 'Sala silenciosa para estudos individuais e em grupo',
-      State: 'Disponivel',
-      SecretaryNote: 'Sala com excelente acústica',
-      Equipment: 'Computadores, Mesas individuais, Ar condicionado',
-      Capacity: 15,
-    }
+      {
+          Name: 'Armário 01',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Armário para guardar pertences pessoais',
+          State: 'Disponivel',
+          SecretaryNote: 'Armário em bom estado',
+          Equipment: '',
+          Capacity: 1,
+      },
+      {
+          Name: 'Armário 02',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Armário para guardar pertences pessoais',
+          State: 'Disponivel',
+          SecretaryNote: 'Armário em bom estado',
+          Equipment: '',
+          Capacity: 1,
+      },
+      {
+          Name: 'Armário 03',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Armário para guardar pertences pessoais',
+          State: 'Disponivel',
+          SecretaryNote: 'Armário em bom estado',
+          Equipment: '',
+          Capacity: 1,
+      },
+      {
+          Name: 'Armário 04',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Armário para guardar pertences pessoais',
+          State: 'Disponivel',
+          SecretaryNote: 'Armário em manutenção',
+          Equipment: '',
+          Capacity: 1,
+      },
+      {
+          Name: 'Armário 05',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Armário para guardar pertences pessoais',
+          State: 'Disponivel',
+          SecretaryNote: 'Armário em bom estado',
+          Equipment: '',
+          Capacity: 1,
+      },
+      {
+          Name: 'Armário 06',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Armário para guardar pertences pessoais',
+          State: 'Disponivel',
+          SecretaryNote: 'Armário em bom estado',
+          Equipment: '',
+          Capacity: 1,
+      },
+      {
+          Name: 'Laboratório 03',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Laboratório de informática com equipamentos modernos',
+          State: 'Disponivel',
+          SecretaryNote: 'Equipamentos atualizados em 2024',
+          Equipment: 'Computadores, Quadro Branco, TVs, Projetor',
+          Capacity: 25,
+      },
+      {
+          Name: 'Sala de Convivência',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Pequena sala para convivência dos alunos',
+          State: 'Disponivel',
+          SecretaryNote: 'Em manutenção - problemas no ar condicionado',
+          Equipment: 'Sofá, Cafeteira, Micro-ondas',
+          Capacity: 10,
+      },
+      {
+          Name: 'Sala de Estudos',
+          NameResponsible: 'Secretaria',
+          IDResponsible: 1,
+          Description: 'Sala silenciosa para estudos individuais e em grupo',
+          State: 'Disponivel',
+          SecretaryNote: 'Sala com excelente acústica',
+          Equipment: 'Computadores, Mesas individuais, Ar condicionado',
+          Capacity: 15,
+      },
   ]
 
   // Criar ou atualizar salas baseadas no nome
@@ -204,27 +213,30 @@ async function main() {
 
     if (existingClassroom) {
       // Atualizar sala existente
-      await prisma.classroom.update({
-        where: {
-          IDClassroom: existingClassroom.IDClassroom,
-        },
-        data: {
-          Responsible: classroom.Responsible,
-          Description: classroom.Description,
-          State: classroom.State,
-          SecretaryNote: classroom.SecretaryNote,
-          Equipment: classroom.Equipment,
-          Capacity: classroom.Capacity,
-        },
+      const updatedClassroom = await prisma.classroom.update({
+          where: {
+              IDClassroom: existingClassroom.IDClassroom,
+          },
+          data: {
+              NameResponsible: classroom.NameResponsible,
+              IDResponsible: classroom.IDResponsible,
+              Description: classroom.Description,
+              State: classroom.State,
+              SecretaryNote: classroom.SecretaryNote,
+              Equipment: classroom.Equipment,
+              Capacity: classroom.Capacity,
+          },
       })
+      console.log(`Sala ${classroom.Name} atualizada:`, updatedClassroom)
     } else {
       // Criar nova sala
-      await prisma.classroom.create({
+      const newClassroom = await prisma.classroom.create({
         data: classroom,
       })
+      console.log(`Sala ${classroom.Name} criada:`, newClassroom)
     }
   }
-  console.log('Salas de exemplo criadas/atualizadas com sucesso.')
+  console.log('Todas as salas de exemplo foram criadas/atualizadas com sucesso.')
 }
 
 main()

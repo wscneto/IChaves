@@ -11,7 +11,6 @@ model User {
   IDUser        Int      @id @default(autoincrement())
   Name          String
   Email         String   @unique
-  ImageProfile  Bytes?
 
   // Relacionamentos
   History       History[]
@@ -39,14 +38,15 @@ model Admin {
 }
 
 model Classroom {
-  IDClassroom   Int      @id @default(autoincrement())
-  Name          String
-  Responsible   String
-  Description   String
-  State         String // 'Disponivel' | 'Em uso' | 'Indisponivel'
-  SecretaryNote String?
-  Equipment     String
-  Capacity      Int
+  IDClassroom       Int      @id @default(autoincrement())
+  Name              String
+  NameResponsible   String
+  IDResponsible     Int
+  Description       String
+  State             String // 'Disponivel' | 'Em uso' | 'Indisponivel'
+  SecretaryNote     String?
+  Equipment         String
+  Capacity          Int
 
   // Relacionamentos
   Histories     History[]
@@ -73,4 +73,10 @@ model Notification {
 
   // Relacionamentos
   User           User     @relation(fields: [IDUserFK], references: [IDUser])
+}
+
+model BlacklistedToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  createdAt DateTime @default(now())
 }

@@ -1,75 +1,124 @@
-# Nuxt Minimal Starter
+# IChaves Frontend
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Sistema de gerenciamento de chaves de salas de aula desenvolvido com Nuxt 4, Vue 3 e TypeScript.
 
-## Setup
+## 🚀 Tecnologias
 
-Make sure to install dependencies:
+- **Nuxt 4** - Framework Vue.js para aplicações full-stack
+- **Vue 3** - Framework JavaScript progressivo
+- **TypeScript** - Superset do JavaScript com tipagem estática
+- **Tailwind CSS** - Framework CSS utilitário
+- **Pinia** - Store de estado para Vue
+- **Nuxt UI** - Componentes UI para Nuxt
+
+## 📋 Pré-requisitos
+
+- Node.js 18+ 
+- npm, pnpm, yarn ou bun
+
+## 🛠️ Instalação
 
 ```bash
-# npm
+# Clone o repositório
+git clone <url-do-repositorio>
+cd IChaves-Frontend
+
+# Instale as dependências
 npm install
-
-# pnpm
+# ou
 pnpm install
-
-# yarn
+# ou
 yarn install
-
-# bun
+# ou
 bun install
 ```
 
-## Development Server
+## 🔧 Configuração
 
-Start the development server on `http://localhost:3000`:
+### Variáveis de Ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+NUXT_PUBLIC_API_URL=http://localhost:3001/api
+```
+
+Para produção, configure a variável `NUXT_PUBLIC_API_URL` no Vercel com a URL da sua API.
+
+## 🚀 Desenvolvimento
+
+Inicie o servidor de desenvolvimento:
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
+# ou
 pnpm dev
-
-# yarn
+# ou
 yarn dev
-
-# bun
+# ou
 bun run dev
 ```
 
-## Production
+A aplicação estará disponível em `http://localhost:3000`.
 
-Build the application for production:
+## 🏗️ Build para Produção
 
 ```bash
-# npm
 npm run build
-
-# pnpm
+# ou
 pnpm build
-
-# yarn
+# ou
 yarn build
-
-# bun
+# ou
 bun run build
 ```
 
-Locally preview production build:
+## 📦 Deploy
 
-```bash
-# npm
-npm run preview
+### Vercel (Recomendado)
 
-# pnpm
-pnpm preview
+1. Conecte seu repositório ao Vercel
+2. Configure a variável de ambiente `NUXT_PUBLIC_API_URL`
+3. O deploy será feito automaticamente
 
-# yarn
-yarn preview
+### Outros provedores
 
-# bun
-bun run preview
+Consulte a [documentação de deploy do Nuxt](https://nuxt.com/docs/getting-started/deployment) para outras opções.
+
+## 📁 Estrutura do Projeto
+
+```
+├── assets/          # Recursos estáticos (CSS, imagens, fontes)
+├── components/      # Componentes Vue reutilizáveis
+├── data/           # Dados estáticos
+├── layouts/        # Layouts da aplicação
+├── pages/          # Páginas da aplicação (roteamento automático)
+├── public/         # Arquivos públicos
+├── services/       # Serviços de API
+├── stores/         # Stores do Pinia
+├── types/          # Definições de tipos TypeScript
+└── nuxt.config.ts  # Configuração do Nuxt
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## 🔗 API
+
+O frontend consome uma API REST. Consulte o arquivo `docs/API.md` para documentação completa da API.
+
+## 📝 Scripts Disponíveis
+
+- `npm run dev` - Servidor de desenvolvimento
+- `npm run build` - Build para produção
+- `npm run preview` - Preview do build de produção
+- `npm run generate` - Geração estática
+
+## 🤝 Contribuição
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.

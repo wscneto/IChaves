@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ichaves-backend
+    env: node
+    plan: free
+    buildCommand: npm install --production=false && npm run build && npm run db:setup
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    healthCheckPath: /health

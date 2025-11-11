@@ -1,7 +1,8 @@
-import jwt from 'jsonwebtoken';
-import { User } from '../utils/errorUtils';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { User } from '../types/user';
 import { UserService } from './userService'; 
-import { LoginRequest, UserCreationData } from '../types/authTypes';
+import { LoginRequest, UserCreationData } from '../types/auth';
+import { PrismaClient } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -20,14 +21,15 @@ export class AuthService
             Name: data.name,
         };
 
+        data.role = data.role.toLowerCase();
+
         // Decidir se é um Aluno ou Admin
-        // A lógica de negócio é: se 'curso' e 'periodo' existem, é aluno.
-        if (data.curso && data.periodo) 
+        if (data.role === 'student') 
         {
             userCreationData.StudentData = 
             {
-                Course: data.curso,
-                Period: data.periodo,
+                Course: data.course!,
+                Period: data.period!,
             };
         }   
         
@@ -37,19 +39,20 @@ export class AuthService
 
         // GERAR O PAYLOAD do JWT
         const payload: User = {
-        id: user.IDUser.toString(),
-        name: user.Name,
-        email: user.Email,
-        // O 'user' que recebemos de volta já tem as relações
-        role: user.Admin ? 'admin' : (user.Student ? 'student' : null),
+            id: user.IDUser.toString(),
+            name: user.Name,
+            email: user.Email,
+            // O 'user' que recebemos de volta já tem as relações
+            role: user.Admin ? 'admin' : (user.Student ? 'student' : null),
         };
 
         // GERAR O TOKEN
-        const token = jwt.sign(payload, JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-        });
+        const options: SignOptions = {
+            expiresIn: '7d',
+        };
+        const token = jwt.sign(payload, JWT_SECRET!, options);
 
-        return token;
+        return token
     }
 
     /**
@@ -62,16 +65,18 @@ export class AuthService
         return user;
     }
 
-    /**
-     * Registra uma solicitação de logout.
-     */
-    static async logout(userId: string): Promise<{ message: string }> 
-    {
-        
-        console.log(`Usuário ${userId} solicitou logout.`);
-        
-        // Retorna uma mensagem de sucesso.
-        return { message: 'Logout registrado. O cliente deve remover o token.' };
+    static async logout(token: string): Promise<{ message: string }> {
+        const prisma = new PrismaClient();
+        try {
+            await prisma.blacklistedToken.create({
+                data: {
+                    token: token,
+                },
+            });
+            return { message: 'Logout bem-sucedido e token invalidado.' };
+        } finally {
+            await prisma.$disconnect();
+        }
     }
 
 }

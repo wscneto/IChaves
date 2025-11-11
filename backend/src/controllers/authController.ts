@@ -1,61 +1,76 @@
-
-// IMPORTAMOS AS FERRAMENTAS
-import { Request, Response } from 'express';
-import { ErrorHandler } from '../middleware/errorHandler'; 
-import { JwtPayload } from 'jsonwebtoken';
-import { ValidationUtils } from '../utils/errorUtils'; 
-import { AuthService } from '../services/authservice'; 
-import { LoginRequest, MeResponse } from '../types/auth';
+import { Request, Response } from 'express'
+import { ErrorHandler } from '../middleware/errorHandler' 
+import { ValidationUtils, AuthenticatedRequest, AuthUtils } from '../utils/errorUtils'
+import { AuthService } from '../services/authService'
+import { LoginRequest } from '../types/auth'
 
 export class AuthController {
-
     /**
-     * Lida com a requisição de login
+     * Endpoint: POST /auth/login
+     * Recebe credenciais, chama o AuthService para logar/registrar
+     * e retorna o token JWT.
      */
     static login = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-        // 'req.body' é o JSON que o frontend enviou
-        const { name, email, adminData, studentData } = req.body;
+        const { email, name, role, course, period } = req.body
 
-        // Usamos o "validador" para checar se os campos obrigatórios vieram
-        ValidationUtils.validateRequired(name, 'name', req);
-        ValidationUtils.validateRequired(email, 'email', req);
-        ValidationUtils.validateEmail(email, req);
+        // 1. Validação de Entrada
+        ValidationUtils.validateRequired(email, 'Email', req)
+        ValidationUtils.validateEmail(email, req)
+        ValidationUtils.validateRequired(name, 'Name', req)
 
-        // Montamos o objeto no formato que o "contrato" LoginRequest pede
-        const loginData: LoginRequest = {
-            name,
-            email,
-            adminData,
-            studentData
-        };
+        const loginData: LoginRequest = { email, name, role, course, period }
 
-        // Chamamos o 'AuthService' e esperamos a resposta
-        const response = await AuthService.login(loginData);
-        // Enviamos o JSON de volta para o frontend
-        res.status(200).json(response);
-    });
+        // 2. Chamar o Serviço
+        const token = await AuthService.login(loginData)
+
+        // 3. Responder
+        res.status(200).json({
+            success: true,
+            message: 'Login bem-sucedido.',
+            token: token,
+        })
+    })
 
     /**
-     * Lida com a requisição de "quem sou eu" (/me)
+     * Endpoint: GET /auth/me
+     * Usa o ID do usuário (anexado pelo AuthMiddleware) para
+     * buscar e retornar os dados atualizados do usuário.
      */
     static me = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-        
-        const userId = (req.user as JwtPayload)?.sub;
+        // 1. O 'req.user' foi anexado pelo AuthMiddleware
+        // O tipo 'User' (payload) que definimos tem a prop 'id'
+        const userId = (req as AuthenticatedRequest).user?.id
 
-        // Se o 'userId' não estiver ali, algo deu muito errado
-        ValidationUtils.validateRequired(userId, 'userId (from token)', req);
+        if (!userId) {
+            //Isso não deve acontecer se o middleware estiver correto
+            AuthUtils.requireAuth(req as AuthenticatedRequest)
+        }
 
-        // Chamamos o método 'me' que acabamos de criar no AuthService
-        const user = await AuthService.me(userId as string);
+        // 2. Chamar o Serviço
+        const user = await AuthService.me(userId as string)
 
-        // Montamos a resposta seguindo o "contrato" MeResponse
-        const response: MeResponse = {
+        // 3. Responder
+        res.status(200).json({
             success: true,
-            data: user
-        };
+            data: user,
+        })
+    })
 
-        // Enviamos o JSON de volta para o frontend
-        res.status(200).json(response);
+    /**
+     * Endpoint: POST /auth/logout
+     * Registra o logout no lado do servidor (atualmente stateless).
+     */
+    static logout = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+        const authHeader = req.headers.authorization;
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (token) {
+            await AuthService.logout(token);
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Logout bem-sucedido. O token foi invalidado.',
+        });
     });
-
 }

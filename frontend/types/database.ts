@@ -18,7 +18,8 @@ export interface User {
 export interface Classroom {
   IDClassroom: number
   Name: string
-  Responsible: string
+  NameResponsible: string
+  IDResponsible: number
   Description: string
   State: 'Disponivel' | 'Em uso' | 'Indisponivel'
   SecretaryNote?: string
@@ -56,7 +57,8 @@ export interface Notification {
 
 export interface CreateClassroomRequest {
   Name: string
-  Responsible: string
+  NameResponsible: string
+  IDResponsible: number
   Description: string
   State: Classroom['State']
   SecretaryNote?: string
@@ -66,7 +68,8 @@ export interface CreateClassroomRequest {
 
 export interface UpdateClassroomRequest {
   Name?: string
-  Responsible?: string
+  NameResponsible?: string
+  IDResponsible?: number
   Description?: string
   State?: Classroom['State']
   SecretaryNote?: string
@@ -124,7 +127,8 @@ export interface UserFilters {
 
 export interface ClassroomFilters {
   State?: Classroom['State']
-  Responsible?: string
+  NameResponsible?: string
+  IDResponsible?: number
   Name?: string
   Capacity?: {
     min?: number
@@ -133,16 +137,17 @@ export interface ClassroomFilters {
 }
 
 export interface HistoryFilters {
-  IDUserFK?: number
-  IDClassroomFK?: number
-  StartDate?: {
-    from?: string
-    to?: string
-  }
-  ReturnDate?: {
-    from?: string
-    to?: string
-  }
+  page?: number;
+  limit?: number;
+  user_id?: number;
+  classroom_id?: number;
+  start_date_from?: string;
+  start_date_to?: string;
+  return_date_from?: string;
+  return_date_to?: string;
+  is_active?: boolean;
+  sort_by?: 'StartDate' | 'ReturnDate';
+  sort_order?: 'asc' | 'desc';
 }
 
 export interface NotificationFilters {

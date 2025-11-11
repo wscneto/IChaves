@@ -1,45 +1,48 @@
+import { JwtPayload } from "jsonwebtoken";
 
-export interface Admin 
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: JwtPayload | string;
+  }
+}
+export {};
+
+export interface UserAuth
 {
-    isAdmin: boolean;
+  Email: string;
+  Name: string;
+  Student: 
+  {
+      Period: string;
+      Course: string;
+  } | null;
+  Admin: {
+      IDUser: number;
+  } | null;
 }
 
-export interface Student
-{
-    period: string;
-    course: string;
-}
-
-export interface LoginRequest 
-{
-    name: string;
-    email: string;
-    adminData?: Admin;
-    studentData?: Student;
-} 
-
-export interface LoginResponse 
-{
-    success: boolean;    
-    message: string;
-    data: {           
-      user: User;  
-      token: string;
-    };
-}
-
-export interface User
-{
-    idUser: number;
-    name: string;
-    email: string;
-    adminData?: Admin;
-    studentData?: Student;
-}
-
-export interface MeResponse 
+export interface LoginResponse
 {
   success: boolean;
-  data: User; 
+  message: string;
+  token: string;
 }
 
+export interface LoginRequest {
+  email: string
+  name: string
+  role: string
+  course?: string // Optional
+  period?: string // Optional
+}
+
+export interface UserCreationData 
+{
+  Name: string;
+  Email: string;
+  StudentData?: 
+  {
+    Course: string;
+    Period: string;
+  }
+}

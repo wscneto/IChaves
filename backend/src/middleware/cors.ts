@@ -15,6 +15,8 @@ export const corsOptions: cors.CorsOptions = {
       'http://localhost:3001',    // Alternative port
       'http://127.0.0.1:3001',   // Alternative localhost port
       'https://login-externo.vercel.app', // External login system
+      'https://ichaves-frontend.vercel.app', // IChaves frontend
+      'https://pisic.vercel.app', // PISIC frontend
       process.env.FRONTEND_URL,   // Production frontend URL
     ].filter(Boolean); // Remove undefined values
 

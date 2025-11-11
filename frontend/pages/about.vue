@@ -43,6 +43,16 @@ import john from '~/assets/images/john.jpeg'
 import davi from '~/assets/images/davi.jpeg'
 import samuel from '~/assets/images/samuel.jpeg'
 
+useHead({
+  title: "Sobre o IChaves",
+  meta: [
+    {
+      name: "description",
+      content: "Conheça a equipe por trás do projeto IChaves e nossa missão de facilitar a gestão de salas de aula no Instituto de Computação da UFAL.",
+    },
+  ],
+});
+
 const team = ref([
   {
     id: 1,

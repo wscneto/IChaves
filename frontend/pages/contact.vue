@@ -74,6 +74,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+useHead({
+  title: "Fale Conosco - IChaves",
+  meta: [
+    {
+      name: "description",
+      content: "Entre em contato com a equipe do IChaves. Envie suas dúvidas, sugestões ou relate problemas através do nosso formulário de contato.",
+    },
+  ],
+});
+
 const form = ref({
   name: '',
   email: '',

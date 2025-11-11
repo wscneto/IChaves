@@ -1,14 +1,18 @@
-import { Router } from 'express';
-import { AuthController } from '../controllers/authController';
-import { authenticateToken } from '../middleware/authMiddleware';
+import { Router } from 'express'
+import { AuthController } from '../controllers/authController'
+import { AuthMiddleware } from '../middleware/auth'
 
-// 1. Criamos a "recepcionista" para este arquivo
-const router = Router();
+const router = Router()
 
-// 2. Conectamos o endpoint de LOGIN
-router.post('/login', AuthController.login);
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET não definido, não é possível iniciar o auth middleware.')
+}
 
-// 3. Conectamos o endpoint ME
-router.get('/me', authenticateToken, AuthController.me);
+const authMiddleware = new AuthMiddleware(JWT_SECRET)
 
-export default router;
+router.post('/login', AuthController.login)
+router.get('/me', authMiddleware.authenticate, AuthController.me)
+router.post('/logout', authMiddleware.authenticate, AuthController.logout)
+
+export default router

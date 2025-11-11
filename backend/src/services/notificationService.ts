@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { AppError, ErrorCode } from "../types/errors";
 import { CreateNotificationData, UpdateNotificationData } from "../types/notification";
+import { getIO } from "./websocketService"; // Import getIO
 
 const prisma = new PrismaClient;
 
@@ -36,6 +37,10 @@ export class NotificationService {
                     IDUserFK: true,
                 }
             });
+
+            // Emit WebSocket event
+            const io = getIO();
+            io.to(`user:${notification.IDUserFK}`).emit('new_notification', notification);
 
             return notification;
         } catch (error) {
@@ -109,6 +114,40 @@ export class NotificationService {
         }
     }
 
+    static async getNotificationsByUser(userId: number) {
+        try {
+            console.log(`[DEBUG] Fetching notifications for user ID: ${userId}`);
+            
+            const notifications = await prisma.notification.findMany({
+                where: {
+                    IDUserFK: userId
+                },
+                select: {
+                    IDNotification: true, 
+                    Message: true,
+                    CreatedAt: true,
+                    ReadAt: true,
+                    IDUserFK: true
+                },
+                orderBy: {
+                    IDNotification: 'desc'
+                }
+            });
+
+            console.log(`[DEBUG] Found ${notifications.length} notifications for user ${userId}`);
+            console.log(`[DEBUG] Notifications:`, notifications);
+
+            return notifications;
+        } catch (error) {
+            console.error(`[DEBUG] Error fetching notifications for user ${userId}:`, error);
+            throw new AppError(
+                ErrorCode.DATABASE_ERROR,
+                'Failed to fetch notifications by user',
+                500
+            );
+        }
+    }
+
     static async updateNotification(id: string, notificationData: UpdateNotificationData) {
         try {
             const existingNotification = await prisma.notification.findUnique({
@@ -151,6 +190,11 @@ export class NotificationService {
                     IDUserFK: true
                 }
             });
+
+            // Emit WebSocket event for classroom update on notification approval
+            const io = getIO();
+            io.emit('notification_approved_classroom_update');
+
             return notification;
         } catch (error) {
             if (error instanceof AppError) {

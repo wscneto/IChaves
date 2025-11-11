@@ -71,7 +71,8 @@ Lista todas as salas com paginação e filtros.
 - `page` (number): Página atual
 - `limit` (number): Itens por página
 - `state` (string): Filtrar por estado
-- `responsible` (string): Filtrar por responsável
+- `name_responsible` (string): Filtrar por nome do responsável
+- `id_responsible` (number): Filtrar por ID do responsável
 - `name` (string): Filtrar por nome
 - `capacity_min` (number): Capacidade mínima
 - `capacity_max` (number): Capacidade máxima
@@ -85,7 +86,8 @@ Lista todas as salas com paginação e filtros.
       {
         "ID_Classroom": 1,
         "Name": "Armário 01",
-        "Responsible": "Secretaria",
+        "NameResponsible": "Secretaria",
+        "IDResponsible": 1,
         "Description": "Armário para guardar pertences pessoais",
         "State": "Disponivel",
         "Secretary_Note": "Armário em bom estado",

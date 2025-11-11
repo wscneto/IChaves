@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia'
 import type { User } from '@/types/database'
 import { api } from '@/services/api'
+import { useNotificationsStore } from './notifications'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null as User | null,
+    token: null as string | null,
     isAuthenticated: false,
-    isLoading: false
+    isLoading: true, // Começa como true para verificar o token
   }),
   getters: {
     userRole: (state) => {
@@ -18,49 +20,69 @@ export const useAuthStore = defineStore('auth', {
     },
     userEmail: (state) => {
       return state.user?.Email || ''
-    }
+    },
   },
   actions: {
-    async loginWithEmail(email: string) {
+    async initializeAuth() {
+      if (typeof window !== 'undefined') {
+        const storedToken = localStorage.getItem('token')
+        if (storedToken) {
+          this.token = storedToken
+          await this.fetchUser()
+        } else {
+          this.isLoading = false
+        }
+      }
+    },
+    async fetchUser() {
+      if (!this.token) {
+        this.isLoading = false
+        return
+      }
       this.isLoading = true
       try {
-        console.log('🔍 Buscando usuário com email:', email)
-        const user = await api.users.getByEmail(email)
-        
-        console.log('📦 Resposta da API:', user)
-        console.log('📦 Tipo da resposta:', typeof user)
-        console.log('📦 É null?', user === null)
-        console.log('📦 É undefined?', user === undefined)
-        
-        if (!user) {
-          console.error('❌ Usuário não encontrado - resposta vazia')
-          throw new Error('Usuário não encontrado')
+        // Presume-se que a API tem um endpoint /users/me para obter o usuário pelo token
+        const user = await api.users.getMe()
+        if (user) {
+          this.user = user
+          this.isAuthenticated = true
+          const notificationsStore = useNotificationsStore()
+          notificationsStore.fetchNotifications(user.IDUser)
+        } else {
+          this.logout() // Se o token for inválido, desloga
         }
-        
-        console.log('✅ Usuário encontrado:', user.Name)
-        console.log('✅ Dados completos do usuário:', JSON.stringify(user, null, 2))
-        
-        this.user = user
-        this.isAuthenticated = true
-        return user
       } catch (error) {
-        console.error('❌ Erro ao fazer login:', error)
-        console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
-        // Limpar estado em caso de erro
-        this.user = null
-        this.isAuthenticated = false
-        throw error
+        console.error('❌ Erro ao buscar usuário com token:', error)
+        this.logout()
       } finally {
         this.isLoading = false
       }
     },
-    logout() {
-      this.user = null
-      this.isAuthenticated = false
+    async logout() {
+      try {
+        await api.auth.logout()
+      } catch (error) {
+        console.error('Error during logout:', error)
+      } finally {
+        this.user = null
+        this.token = null
+        this.isAuthenticated = false
+        this.isLoading = false
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token')
+          // Redirect to external login after logout
+          window.location.href = 'https://pisic.vercel.app/'
+        }
+        const notificationsStore = useNotificationsStore()
+        notificationsStore.notifications = []
+      }
     },
-    setUser(user: User) {
-      this.user = user
-      this.isAuthenticated = true
-    }
-  }
+    async setToken(token: string) {
+      this.token = token
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', token)
+      }
+      await this.fetchUser()
+    },
+  },
 })

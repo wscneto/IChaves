@@ -1,8 +1,8 @@
+import { User } from './user';
+
 
 export interface CreateNotificationRequest {
     Message: string;
-
-    //CreatedAt: string;
     ReadAt?: string;
     IDUserFK: number;
 }
@@ -22,11 +22,7 @@ export interface NotificationResponse {
         CreatedAt: string;
         ReadAt?: string;
         IDUserFK: number;
-        User?: {
-            IDUser: number;
-            Name: string;
-            Email: string;
-        };
+        receivingUser: User;
     };
     message: string;
 }

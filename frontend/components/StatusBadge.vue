@@ -1,12 +1,13 @@
 <template>
-  <span
+  <div
     :class="[
-      'px-3 py-1 text-sm font-semibold rounded-full',
+      'items-center justify-center border rounded-[5px] py-1 font-bold text-sm leading-normal whitespace-nowrap w-25',
       badgeColor
     ]"
+    style="display: flex;"
   >
     {{ statusLabel }}
-  </span>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -36,11 +37,11 @@ const statusLabel = computed(() => {
 const badgeColor = computed(() => {
   switch (normalizedStatus.value) {
     case 'Disponivel':
-      return 'bg-green-100 text-green-700'
+      return 'bg-[#D9F7BE] text-[#3E9615] border-[#3E9615]'
     case 'Em uso':
-      return 'bg-orange-100 text-orange-700'
+      return 'bg-[#FFD8BF] text-[#D97E5D] border-[#D97E5D]'
     case 'Indisponivel':
-      return 'bg-red-100 text-red-700'
+      return 'bg-[#FFCCC7] text-[#D9625F] border-[#D9625F]'
     default:
       return 'bg-gray-100 text-gray-700'
   }

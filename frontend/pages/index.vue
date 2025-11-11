@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-50">
+  <div class="flex flex-col bg-gray-50">
     <!-- Search Input -->
     <div class="p-4">
-      <div v-if="isLoading" class="animate-pulse">
+      <div v-if="classroomsStore.isLoading" class="animate-pulse">
         <div class="h-12 bg-gray-200 rounded-xl" />
       </div>
       <input
@@ -11,11 +11,11 @@
         type="text"
         placeholder="Busque uma sala..."
         class="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none font-funnel-sans"
-      >
+      />
     </div>
 
     <!-- Loading Message -->
-    <div v-if="isLoading" class="px-4 pb-2">
+    <div v-if="classroomsStore.isLoading" class="px-4 pb-2">
       <div class="animate-pulse">
         <div class="h-4 bg-gray-200 rounded w-48" />
       </div>
@@ -24,12 +24,15 @@
     <!-- Classrooms Grid -->
     <main class="flex-1 p-4">
       <!-- Loading State -->
-      <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div
+        v-if="classroomsStore.isLoading"
+        class="grid grid-cols-1 xl:grid-cols-2 gap-5"
+      >
         <ClassroomItemSkeleton v-for="n in 8" :key="n" />
       </div>
 
       <!-- Classrooms Content -->
-      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-5">
         <ClassroomItem
           v-for="classroom in filteredClassrooms"
           :key="classroom.IDClassroom"
@@ -42,13 +45,14 @@
       </div>
 
       <!-- Empty State -->
-      <div v-if="!isLoading && filteredClassrooms.length === 0" class="text-center py-12">
+      <div
+        v-if="!classroomsStore.isLoading && filteredClassrooms.length === 0"
+        class="text-center py-12"
+      >
         <div class="text-gray-500 text-lg font-funnel-sans">
           Nenhuma sala encontrada
         </div>
-        <div class="text-gray-400 text-sm mt-2">
-          Tente ajustar sua busca
-        </div>
+        <div class="text-gray-400 text-sm mt-2">Tente ajustar sua busca</div>
       </div>
     </main>
 
@@ -56,270 +60,319 @@
     <ConfirmPopUp
       :show="isConfirmOpen"
       :title="confirmTitle"
+      :subtitle="confirmSubtitle"
       :message="confirmMessage"
+      :show-input="showInput"
+      :is-info="isInfoPopup"
+      :input-label="inputLabel"
+      :input-placeholder="inputPlaceholder"
       @confirm="onConfirm"
+      @ok="isConfirmOpen = false"
       @cancel="isConfirmOpen = false"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import type { Classroom } from '@/types/database'
-import ConfirmPopUp from '@/components/ConfirmPopUp.vue'
-import ClassroomItem from '@/components/ClassroomItem.vue'
-import ClassroomItemSkeleton from '@/components/ClassroomItemSkeleton.vue'
-import { useAuthStore } from '@/stores/auth'
-import { getClassrooms, updateClassroomState } from '@/data/classrooms'
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import type { Classroom } from "@/types/database";
+import ConfirmPopUp from "@/components/ConfirmPopUp.vue";
+import ClassroomItem from "@/components/ClassroomItem.vue";
+import ClassroomItemSkeleton from "@/components/ClassroomItemSkeleton.vue";
+import { useAuthStore } from "@/stores/auth";
+import {
+  borrowClassroom,
+  devolveClassroom,
+  suspendClassroom,
+  releaseClassroom,
+} from "@/data/classrooms";
+import { api } from "@/services/api";
 
-const router = useRouter()
-const authStore = useAuthStore()
-const searchQuery = ref('')
+import { useClassroomsStore } from "@/stores/classrooms";
+
+useHead({
+  title: "IChaves - Gestão de Salas de Aula",
+  meta: [
+    {
+      name: "description",
+      content:
+        "Encontre e gerencie salas de aula no Instituto de Computação da UFAL. Veja a disponibilidade, reserve e acompanhe o histórico de uso.",
+    },
+  ],
+});
+
+const router = useRouter();
+const authStore = useAuthStore();
+const classroomsStore = useClassroomsStore();
+const searchQuery = ref("");
 
 // State for confirmation popup
-const isConfirmOpen = ref(false)
-const confirmTitle = ref('')
-const confirmMessage = ref('')
-let onConfirmAction: (() => void) | null = null
+const isConfirmOpen = ref(false);
+const confirmTitle = ref("");
+const confirmSubtitle = ref("");
+const confirmMessage = ref("");
+const showInput = ref(false);
+const isInfoPopup = ref(false);
+const inputLabel = ref("");
+const inputPlaceholder = ref("");
+let onConfirmAction: ((value?: string) => void) | null = null;
 
 // Classrooms data
-const classrooms = ref<Classroom[]>([])
-const isLoading = ref(true) // Começa como true para mostrar skeleton imediatamente
-const actionLoading = ref<number | null>(null) // ID da sala que está sendo processada
+const actionLoading = ref<number | null>(null); // ID da sala que está sendo processada
 
 const filteredClassrooms = computed(() =>
-  classrooms.value.filter((classroom) =>
-    classroom.Name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-)
+  classroomsStore.classrooms
+    .filter((classroom) =>
+      classroom.Name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+    .sort((a, b) => a.Name.localeCompare(b.Name))
+);
 
 // Load classrooms on mount
 onMounted(async () => {
-  // Verificar se há parâmetro email na URL
-  const route = useRoute()
-  const email = route.query.email as string
-
-  if (!email) {
-    // Redirecionar para o site de login se não há email
-    console.warn('❌ Email não fornecido na URL, redirecionando para login externo')
-    console.log('🔄 Redirecionando em 3 segundos...')
-    setTimeout(() => {
-      window.location.href = 'https://login-externo.vercel.app/'
-    }, 3000)
-    return
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "https://pisic.vercel.app/";
+    return;
   }
-
-  // Validar formato do email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email)) {
-    console.error('❌ Formato de email inválido:', email)
-    console.log('🔄 Redirecionando em 3 segundos...')
-    setTimeout(() => {
-      window.location.href = 'https://login-externo.vercel.app/'
-    }, 3000)
-    return
-  }
-
-  // Tentar fazer login com o email
-  try {
-    console.log('🚀 Iniciando processo de login com email:', email)
-    
-    // Teste direto da API primeiro
-    console.log('🧪 Testando API diretamente...')
-    const testUrl = 'http://localhost:3001/api/users/email?email=' + encodeURIComponent(email)
-    console.log('🧪 URL de teste:', testUrl)
-    
-    try {
-      console.log('🧪 Fazendo fetch para:', testUrl)
-      const testResponse = await fetch(testUrl)
-      console.log('🧪 Status do teste:', testResponse.status)
-      console.log('🧪 Headers do teste:', Object.fromEntries(testResponse.headers.entries()))
-      
-      if (!testResponse.ok) {
-        console.error('🧪 ❌ Resposta não OK:', testResponse.status, testResponse.statusText)
-        const errorText = await testResponse.text()
-        console.error('🧪 ❌ Conteúdo do erro:', errorText)
-      } else {
-        const testData = await testResponse.json()
-        console.log('🧪 ✅ Dados do teste:', testData)
-        console.log('🧪 ✅ Tipo dos dados:', typeof testData)
-        console.log('🧪 ✅ Dados têm propriedade data?', 'data' in testData)
-        if (testData.data) {
-          console.log('🧪 ✅ Dados.data:', testData.data)
-        }
-      }
-    } catch (testError) {
-      console.error('🧪 ❌ Erro no teste direto:', testError)
-      console.error('🧪 ❌ Stack trace:', testError instanceof Error ? testError.stack : 'No stack')
-    }
-    
-    console.log('🔄 Agora tentando via store...')
-    await authStore.loginWithEmail(email)
-    console.log('✅ Login realizado com sucesso via store')
-  } catch (error) {
-    console.error('❌ Erro ao fazer login:', error)
-    console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack')
-    console.log('🔄 Redirecionando em 3 segundos...')
-    // Redirecionar para o site de login em caso de erro
-    setTimeout(() => {
-      window.location.href = 'https://login-externo.vercel.app/'
-    }, 3000)
-    return
-  }
-
-  // Carregar salas após login bem-sucedido
-  isLoading.value = true
-  try {
-    // Delay mínimo para mostrar o skeleton
-    const [classroomsData] = await Promise.all([
-      getClassrooms(),
-      new Promise(resolve => setTimeout(resolve, 500)) // Delay mínimo de 500ms
-    ])
-    classrooms.value = classroomsData
-    console.log('Salas carregadas com sucesso:', classroomsData.length)
-  } catch (error) {
-    console.error('Erro ao carregar salas:', error)
-  } finally {
-    isLoading.value = false
-  }
-})
+  await classroomsStore.fetchClassrooms();
+});
 
 const goToClassroom = (classroom: Classroom) => {
-  router.push(`/classrooms/${classroom.IDClassroom}`)
-}
+  router.push(`/classrooms/${classroom.IDClassroom}`);
+};
 
-const openConfirmPopup = (title: string, message: string, action: () => void) => {
-  confirmTitle.value = title
-  confirmMessage.value = message
-  onConfirmAction = action
-  isConfirmOpen.value = true
-}
+const openConfirmPopup = (
+  title: string,
+  subtitle: string,
+  message: string,
+  action: (value?: string) => void,
+  inputConfig?: { label: string; placeholder: string },
+  isInfo = false
+) => {
+  confirmTitle.value = title;
+  confirmSubtitle.value = subtitle;
+  confirmMessage.value = message;
+  onConfirmAction = action;
+  showInput.value = !!inputConfig;
+  isInfoPopup.value = isInfo;
+  inputLabel.value = inputConfig?.label || "";
+  inputPlaceholder.value = inputConfig?.placeholder || "";
+  isConfirmOpen.value = true;
+};
 
-const onConfirm = () => {
+const showInfoPopup = (title: string, message: string) => {
+  // Usa o openConfirmPopup para mostrar uma informação, com o modo 'isInfo' ativado.
+  openConfirmPopup(title, "", message, () => {}, undefined, true);
+};
+
+const onConfirm = (value?: string) => {
   if (onConfirmAction) {
-    onConfirmAction()
+    onConfirmAction(value);
   }
-  isConfirmOpen.value = false
-  onConfirmAction = null
-}
+  isConfirmOpen.value = false;
+  onConfirmAction = null;
+  isInfoPopup.value = false; // Reset a flag
+};
 
 const handleClassroomAction = async (action: string, classroom: Classroom) => {
+  // Verificar se o usuário está autenticado
+  if (!authStore.isAuthenticated || !authStore.user) {
+    showInfoPopup(
+      "Ação Requerida",
+      "Você precisa fazer login para realizar esta ação."
+    );
+    return;
+  }
+
+  const userId = authStore.user.IDUser;
+
   switch (action) {
-    case 'reservar':
+    case "reservar":
       openConfirmPopup(
-        'Reservar Sala',
-        `Você tem certeza que deseja reservar a sala ${classroom.Name}?`,
+        classroom.Name,
+        classroom.Description,
+        `Deseja enviar um pedido de <strong>reserva</strong> para o <strong>administrador</strong>?`,
         async () => {
           try {
-            actionLoading.value = classroom.IDClassroom
-            await updateClassroomState(classroom.IDClassroom, 'Em uso')
-            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
-            if (index !== -1 && classrooms.value[index]) {
-              classrooms.value[index].State = 'Em uso'
-            }
-          } catch (error) {
-            console.error('Erro ao reservar sala:', error)
-            alert('Erro ao reservar a sala. Tente novamente.')
-          } finally {
-            actionLoading.value = null
-          }
-        }
-      )
-      break
+            actionLoading.value = classroom.IDClassroom;
+            // Request reservation - this now creates a notification for admin approval
+            await borrowClassroom(userId, classroom.IDClassroom);
+            await classroomsStore.fetchClassrooms(); // ATUALIZA O ESTADO
 
-    case 'trocar':
-      openConfirmPopup(
-        'Trocar Sala',
-        `Você tem certeza que deseja trocar a sala ${classroom.Name}?`,
-        async () => {
-          try {
-            actionLoading.value = classroom.IDClassroom
-            await updateClassroomState(classroom.IDClassroom, 'Disponivel')
-            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
-            if (index !== -1 && classrooms.value[index]) {
-              classrooms.value[index].State = 'Disponivel'
-            }
+            showInfoPopup(
+              "Solicitação Enviada",
+              "Sua solicitação de reserva foi enviada! Aguarde a aprovação do administrador."
+            );
           } catch (error) {
-            console.error('Erro ao trocar sala:', error)
-            alert('Erro ao trocar a sala. Tente novamente.')
+            console.error("Erro ao reservar sala:", error);
+            showInfoPopup(
+              "Erro",
+              "Ocorreu um erro ao solicitar a reserva. Por favor, tente novamente."
+            );
           } finally {
-            actionLoading.value = null
+            actionLoading.value = null;
           }
         }
-      )
-      break
+      );
+      break;
 
-    case 'solicitar':
+    case "trocar":
       openConfirmPopup(
-        'Solicitar Sala',
-        `Você tem certeza que deseja solicitar a sala ${classroom.Name}?`,
+        classroom.Name,
+        classroom.Description,
+        `Deseja enviar um pedido de <strong>troca</strong> para <strong>${classroom.NameResponsible}</strong>?`,
         async () => {
           try {
-            actionLoading.value = classroom.IDClassroom
-            await updateClassroomState(classroom.IDClassroom, 'Em uso')
-            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
-            if (index !== -1 && classrooms.value[index]) {
-              classrooms.value[index].State = 'Em uso'
-            }
-          } catch (error) {
-            console.error('Erro ao solicitar sala:', error)
-            alert('Erro ao solicitar a sala. Tente novamente.')
-          } finally {
-            actionLoading.value = null
-          }
-        }
-      )
-      break
+            actionLoading.value = classroom.IDClassroom;
+            // Request trade - this now creates a notification for the current key holder
+            await api.actions.return(userId, classroom.IDClassroom);
+            await classroomsStore.fetchClassrooms(); // ATUALIZA O ESTADO
 
-    case 'suspender':
-      openConfirmPopup(
-        'Suspender Sala',
-        `Você tem certeza que deseja suspender a sala ${classroom.Name}?`,
-        async () => {
-          try {
-            actionLoading.value = classroom.IDClassroom
-            await updateClassroomState(classroom.IDClassroom, 'Indisponivel')
-            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
-            if (index !== -1 && classrooms.value[index]) {
-              classrooms.value[index].State = 'Indisponivel'
-            }
+            showInfoPopup(
+              "Solicitação Enviada",
+              "Sua solicitação de troca foi enviada! Aguarde a resposta do usuário que tem a chave."
+            );
           } catch (error) {
-            console.error('Erro ao suspender sala:', error)
-            alert('Erro ao suspender a sala. Tente novamente.')
+            console.error("Erro ao trocar sala:", error);
+            showInfoPopup(
+              "Erro",
+              "Ocorreu um erro ao solicitar a troca. Por favor, tente novamente."
+            );
           } finally {
-            actionLoading.value = null
+            actionLoading.value = null;
           }
         }
-      )
-      break
+      );
+      break;
 
-    case 'liberar':
+    case "devolver":
       openConfirmPopup(
-        'Liberar Sala',
-        `Você tem certeza que deseja liberar a sala ${classroom.Name}?`,
+        classroom.Name,
+        classroom.Description,
+        `Deseja enviar um pedido de <strong>devolução</strong> para a <strong>Secretaria</strong>?`,
         async () => {
           try {
-            actionLoading.value = classroom.IDClassroom
-            await updateClassroomState(classroom.IDClassroom, 'Disponivel')
-            const index = classrooms.value.findIndex(c => c.IDClassroom === classroom.IDClassroom)
-            if (index !== -1 && classrooms.value[index]) {
-              classrooms.value[index].State = 'Disponivel'
-            }
+            actionLoading.value = classroom.IDClassroom;
+            // Request devolution - this now creates a notification for admin confirmation
+            await devolveClassroom(userId, classroom.IDClassroom);
+            await classroomsStore.fetchClassrooms(); // ATUALIZA O ESTADO
+
+            showInfoPopup(
+              "Solicitação Enviada",
+              "Sua solicitação de devolução foi enviada! Aguarde a confirmação do administrador."
+            );
           } catch (error) {
-            console.error('Erro ao liberar sala:', error)
-            alert('Erro ao liberar a sala. Tente novamente.')
+            console.error("Erro ao devolver sala:", error);
+            showInfoPopup(
+              "Erro",
+              "Ocorreu um erro ao solicitar a devolução. Por favor, tente novamente."
+            );
           } finally {
-            actionLoading.value = null
+            actionLoading.value = null;
           }
         }
-      )
-      break
+      );
+      break;
+
+    case "solicitar":
+      openConfirmPopup(
+        classroom.Name,
+        classroom.Description,
+        `Deseja enviar um pedido de <strong>solicitação</strong> para <strong>${classroom.NameResponsible}</strong>?`,
+        async () => {
+          try {
+            actionLoading.value = classroom.IDClassroom;
+            // Request key from student - this now creates a notification for the student
+            await api.actions.request(userId, classroom.IDClassroom);
+            await classroomsStore.fetchClassrooms(); // ATUALIZA O ESTADO
+
+            showInfoPopup(
+              "Solicitação Enviada",
+              "Sua solicitação de chave foi enviada! Aguarde a resposta do aluno."
+            );
+          } catch (error) {
+            console.error("Erro ao solicitar sala:", error);
+            showInfoPopup(
+              "Erro",
+              "Ocorreu um erro ao solicitar a sala. Por favor, tente novamente."
+            );
+          } finally {
+            actionLoading.value = null;
+          }
+        }
+      );
+      break;
+
+    case "suspender":
+      openConfirmPopup(
+        classroom.Name,
+        classroom.Description,
+        `Você tem certeza que deseja suspender a sala <strong>${classroom.Name}</strong>?`,
+        async (reason) => {
+          try {
+            actionLoading.value = classroom.IDClassroom;
+            // Usar a API real para suspender a sala
+            await suspendClassroom(
+              classroom.IDClassroom,
+              reason || "Suspensão administrativa"
+            );
+            await classroomsStore.fetchClassrooms(); // ATUALIZA O ESTADO
+            showInfoPopup("Sucesso", "A sala foi suspensa com sucesso!");
+          } catch (error) {
+            console.error("Erro ao suspender sala:", error);
+            showInfoPopup(
+              "Erro",
+              "Ocorreu um erro ao suspender a sala. Por favor, tente novamente."
+            );
+          } finally {
+            actionLoading.value = null;
+          }
+        },
+        {
+          label: "Motivo da suspensão:",
+          placeholder: "Digite o motivo da suspensão...",
+        }
+      );
+      break;
+
+    case "liberar":
+      openConfirmPopup(
+        classroom.Name,
+        classroom.Description,
+        `Você tem certeza que deseja liberar a sala <strong>${classroom.Name}</strong>?`,
+        async (reason) => {
+          try {
+            actionLoading.value = classroom.IDClassroom;
+            // Usar a API real para liberar a sala
+            await releaseClassroom(
+              classroom.IDClassroom,
+              reason || "Liberação administrativa"
+            );
+            await classroomsStore.fetchClassrooms(); // ATUALIZA O ESTADO
+            showInfoPopup("Sucesso", "A sala foi liberada com sucesso!");
+          } catch (error) {
+            console.error("Erro ao liberar sala:", error);
+            showInfoPopup(
+              "Erro",
+              "Ocorreu um erro ao liberar a sala. Por favor, tente novamente."
+            );
+          } finally {
+            actionLoading.value = null;
+          }
+        },
+        {
+          label: "Motivo da liberação:",
+          placeholder: "Digite o motivo da liberação...",
+        }
+      );
+      break;
 
     default:
-      console.warn('Ação não reconhecida:', action)
+      console.warn("Ação não reconhecida:", action);
   }
-}
+};
 </script>
 
 <style scoped>

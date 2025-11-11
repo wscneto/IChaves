@@ -5,18 +5,16 @@
       class="w-7 h-7 text-gray-700 hover:text-blue-600 transition"
     />
     <span
-      v-if="hasNotifications"
-      class="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border border-white"
-    />
+      v-if="notificationsStore.unreadCount > 0"
+      class="absolute top-1 right-1 min-w-[18px] px-1 h-4 bg-red-500 rounded-full border border-white text-white text-xs flex items-center justify-center"
+    >
+      {{ notificationsStore.unreadCount > 9 ? '9+' : notificationsStore.unreadCount }}
+    </span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useNotificationsStore } from '@/stores/notifications'
 
-const notifications = useNotificationsStore()
-const hasNotifications = computed(
-  () => notifications.pendingRequests.length > 0
-)
+const notificationsStore = useNotificationsStore()
 </script>

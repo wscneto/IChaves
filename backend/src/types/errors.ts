@@ -91,7 +91,9 @@ export class AppError extends Error {
     this.requestId = requestId;
 
     // Maintains proper stack trace for where our error was thrown
-    Error.captureStackTrace(this, this.constructor);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 
   /**

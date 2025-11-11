@@ -1,13 +1,12 @@
 <template>
-  <div>
-    <component :is="auth.userRole === 'admin' ? AppHeaderAdmin : AppHeaderStudent" />
-    <div class="pt-[60px] sm:pt-[80px] lg:pt-[100px]">
-      <div v-if="auth.isAuthenticated" class="p-2 sm:p-4 bg-blue-600 text-white text-center">
-        <p class="text-sm sm:text-base md:text-lg font-normal">
-          Esta é a página {{ auth.userRole === 'admin' ? 'da secretaria' : 'do estudante' }}. Para acessar a página 
-          {{ auth.userRole === 'admin' ? 'do estudante' : 'da secretaria' }}, clique <span class="cursor-pointer text-yellow-400 hover:text-green-500 font-bold" @click="toggleRole">aqui.</span>
-        </p>
-      </div>
+  <div class="flex flex-col min-h-screen">
+    <!-- Header sempre presente para evitar problemas de layout -->
+    <AppHeaderStudent v-if="!auth.isAuthenticated || auth.userRole === 'student'" />
+    <AppHeaderAdmin v-else />
+    
+    <!-- Padding fixo para evitar problemas de layout -->
+    <div class="pt-[60px] sm:pt-[80px] lg:pt-[100px] flex-grow">
+
       <slot />
     </div>
     <AppFooter />

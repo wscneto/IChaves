@@ -7,13 +7,13 @@ import { CreateNotificationData, UpdateNotificationData } from "../types/notific
 export class NotificationController {
 
     static createNotification = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-        const { Message, CreatedAt, ReadAt, IDUserFK } = req.body
+        const { Message, IDUserFK } = req.body
 
         ValidationUtils.validateRequired(Message, 'Message', req);
         ValidationUtils.validateRequired(IDUserFK, 'IDUserFK', req);
 
         ValidationUtils.validateLength(Message, 'Message', 1, 500, req);
-        await ValidationUtils.validateUserExists(IDUserFK, req);
+        await ValidationUtils.validateUserExists(IDUserFK);
 
         const notificationData: CreateNotificationData = { Message, IDUserFK };
 
@@ -41,6 +41,20 @@ export class NotificationController {
 
     static getAllNotifications = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
         const notifications = await NotificationService.getAllNotifications();
+
+        res.status(200).json({
+            success: true,
+            data: notifications,
+            count: notifications.length
+        });
+    });
+
+    static getNotificationsByUser = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
+        const { userId } = req.params;
+        
+        ValidationUtils.validateRequired(userId, 'userId', req);
+
+        const notifications = await NotificationService.getNotificationsByUser(parseInt(userId));
 
         res.status(200).json({
             success: true,
@@ -108,7 +122,7 @@ export class NotificationController {
 
         ValidationUtils.validateRequired(userId, 'userId', req);
 
-        await ValidationUtils.validateUserExists(userId, req);
+        await ValidationUtils.validateUserExists(userId);
 
         const result = await NotificationService.markAllAsRead(userId);
 
@@ -123,7 +137,7 @@ export class NotificationController {
         const { userId } = req.params;
 
         ValidationUtils.validateRequired(userId, 'userId', req);
-        await ValidationUtils.validateUserExists(userId, req);
+        await ValidationUtils.validateUserExists(userId);
 
         const result = await NotificationService.getUnreadNotifications(userId);
 

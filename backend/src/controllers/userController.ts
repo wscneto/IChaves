@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { ErrorHandler } from '../middleware/errorHandler';
 import { UserService, CreateUserData, UpdateUserData } from '../services/userService';
 import { ValidationUtils } from '../utils/errorUtils';

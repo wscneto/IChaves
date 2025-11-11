@@ -27,7 +27,8 @@ export class ClassroomService {
       const classroom = await prisma.classroom.create({
         data: {
           Name: classroomData.Name,
-          Responsible: classroomData.Responsible,
+          NameResponsible: classroomData.NameResponsible,
+          IDResponsible: classroomData.IDResponsible,
           Description: classroomData.Description,
           State: classroomData.State,
           SecretaryNote: classroomData.SecretaryNote,
@@ -37,7 +38,8 @@ export class ClassroomService {
         select: {
           IDClassroom: true,
           Name: true,
-          Responsible: true,
+          NameResponsible: true,
+          IDResponsible: true,
           Description: true,
           State: true,
           SecretaryNote: true,
@@ -69,7 +71,8 @@ export class ClassroomService {
         select: {
           IDClassroom: true,
           Name: true,
-          Responsible: true,
+          NameResponsible: true,
+          IDResponsible: true,
           Description: true,
           State: true,
           SecretaryNote: true,
@@ -108,7 +111,8 @@ export class ClassroomService {
         select: {
           IDClassroom: true,
           Name: true,
-          Responsible: true,
+          NameResponsible: true,
+          IDResponsible: true,
           Description: true,
           State: true,
           SecretaryNote: true,
@@ -173,7 +177,8 @@ export class ClassroomService {
         select: {
           IDClassroom: true,
           Name: true,
-          Responsible: true,
+          NameResponsible: true,
+          IDResponsible: true,
           Description: true,
           State: true,
           SecretaryNote: true,

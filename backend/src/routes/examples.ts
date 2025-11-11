@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ErrorHandler } from '../middleware/errorHandler';
-import { ErrorUtils, ValidationUtils, AuthUtils } from '../utils/errorUtils';
+import { ErrorUtils, ValidationUtils } from '../utils/errorUtils';
 import { ErrorCode } from '../types/errors';
 
 const router = Router();
@@ -57,11 +57,13 @@ router.get('/auth', ErrorHandler.asyncHandler(async (req, res) => {
 // GET /api/examples/forbidden - Demonstrates authorization errors
 router.get('/forbidden', ErrorHandler.asyncHandler(async (req, res) => {
   // Simulate user with limited permissions
-  const user = { id: '1', roles: ['user'] };
-  (req as any).user = user;
+  const { userRole } = req.query;
+  const role = userRole || 'user';
 
-  // Try to access admin resource
-  AuthUtils.requireRole('admin', req);
+  // Check if user has admin role
+  if (role !== 'admin') {
+    ErrorUtils.throwForbiddenError('Admin access required', req);
+  }
 
   res.json({
     success: true,

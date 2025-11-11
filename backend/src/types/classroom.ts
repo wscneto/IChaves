@@ -7,7 +7,8 @@ export type ClassroomState = 'Disponivel' | 'Em uso' | 'Indisponivel';
 
 export interface CreateClassroomRequest {
   Name: string;
-  Responsible: string;
+  NameResponsible: string;
+  IDResponsible: number;
   Description: string;
   State: ClassroomState;
   SecretaryNote?: string;
@@ -17,7 +18,8 @@ export interface CreateClassroomRequest {
 
 export interface UpdateClassroomRequest {
   Name?: string;
-  Responsible?: string;
+  NameResponsible?: string;
+  IDResponsible?: number;
   Description?: string;
   State?: ClassroomState;
   SecretaryNote?: string;
@@ -28,7 +30,8 @@ export interface UpdateClassroomRequest {
 export interface ClassroomData {
   IDClassroom: number;
   Name: string;
-  Responsible: string;
+  NameResponsible: string;
+  IDResponsible: number;
   Description: string;
   State: string;
   SecretaryNote?: string;
@@ -50,7 +53,8 @@ export interface ClassroomListResponse {
 
 export interface CreateClassroomData {
   Name: string;
-  Responsible: string;
+  NameResponsible: string;
+  IDResponsible: number;
   Description: string;
   State: ClassroomState;
   SecretaryNote?: string;
@@ -60,7 +64,8 @@ export interface CreateClassroomData {
 
 export interface UpdateClassroomData {
   Name?: string;
-  Responsible?: string;
+  NameResponsible?: string;
+  IDResponsible?: number;
   Description?: string;
   State?: ClassroomState;
   SecretaryNote?: string;

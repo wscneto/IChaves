@@ -9,11 +9,12 @@ export class ClassroomController {
    * Create a new classroom
    */
   static createClassroom = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
-    const { Name, Responsible, Description, State, SecretaryNote, Equipment, Capacity } = req.body;
+    const { Name, NameResponsible, IDResponsible, Description, State, SecretaryNote, Equipment, Capacity } = req.body;
 
     // Validate required fields
     ValidationUtils.validateRequired(Name, 'Name', req);
-    ValidationUtils.validateRequired(Responsible, 'Responsible', req);
+    ValidationUtils.validateRequired(NameResponsible, 'NameResponsible', req);
+    ValidationUtils.validateRequired(IDResponsible, 'IDResponsible', req);
     ValidationUtils.validateRequired(Description, 'Description', req);
     ValidationUtils.validateRequired(Equipment, 'Equipment', req);
     ValidationUtils.validateRequired(Capacity, 'Capacity', req);
@@ -27,7 +28,8 @@ export class ClassroomController {
 
     const classroomData: CreateClassroomData = { 
       Name, 
-      Responsible, 
+      NameResponsible, 
+      IDResponsible, 
       Description, 
       State, 
       SecretaryNote, 
@@ -78,7 +80,7 @@ export class ClassroomController {
    */
   static updateClassroom = ErrorHandler.asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { Name, Responsible, Description, State, SecretaryNote, Equipment, Capacity } = req.body;
+    const { Name, NameResponsible, IDResponsible, Description, State, SecretaryNote, Equipment, Capacity } = req.body;
 
     ValidationUtils.validateRequired(id, 'id', req);
 
@@ -98,7 +100,8 @@ export class ClassroomController {
 
     const classroomData: UpdateClassroomData = { 
       Name, 
-      Responsible, 
+      NameResponsible, 
+      IDResponsible, 
       Description, 
       State, 
       SecretaryNote, 

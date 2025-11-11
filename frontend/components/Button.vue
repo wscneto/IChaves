@@ -75,7 +75,7 @@ const buttonClasses = computed(() => {
     ],
     green: [
       'bg-green-4',
-      'text-white',
+      'text-gray-10',
       'hover:bg-green-6',
       'focus:ring-green-4',
       'shadow-sm',
@@ -83,7 +83,7 @@ const buttonClasses = computed(() => {
     ],
     volcano: [
       'bg-volcano-4',
-      'text-white',
+      'text-gray-10',
       'hover:bg-volcano-6',
       'focus:ring-volcano-4',
       'shadow-sm',
@@ -91,7 +91,7 @@ const buttonClasses = computed(() => {
     ],
     red: [
       'bg-red-4',
-      'text-white',
+      'text-gray-10',
       'hover:bg-red-6',
       'focus:ring-red-4',
       'shadow-sm',
