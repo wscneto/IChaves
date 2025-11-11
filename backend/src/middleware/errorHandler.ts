@@ -13,7 +13,6 @@ export class ErrorHandler {
     error: Error | AppError,
     req: Request,
     res: Response,
-    next: NextFunction
   ): void => {
     const requestId = req.headers['x-request-id'] as string || this.generateRequestId();
     
