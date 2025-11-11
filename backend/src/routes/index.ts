@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import examplesRouter from './examples';
 import usersRouter from './users';
 import classroomsRouter from './classrooms';
-import notificationsRouter from './notifications'
-import historiesRouter from './histories';
-
 import actionsRouter from './actions';
+import notificationsRouter from './notifications';
+import AuthRouter from './auth'
+import historiesRouter from './histories'
 
 /**
  * Main router that aggregates all route modules
@@ -14,19 +13,17 @@ import actionsRouter from './actions';
 
 const router = Router();
 
-// API Routes
-router.use('/examples', examplesRouter);
+// API Routes - Add your route modules here
 router.use('/users', usersRouter);
+// Classroom routes
 router.use('/classrooms', classroomsRouter);
+// Action routes
+router.use('/actions', actionsRouter);
+// Auth routes
+router.use('/auth', AuthRouter);
 //Notification routes
 router.use('/notifications', notificationsRouter);
 
-router.use('/histories', historiesRouter);
-// Action routes
-router.use('/actions', actionsRouter);
-
-// Add more route modules here as they are created
-
-
+router.use('/histories', historiesRouter)
 
 export default router;

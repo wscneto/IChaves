@@ -5,8 +5,9 @@
 
 import { ClassroomState } from './classroom';
 
+
 // Action types
-export type ActionType = 'reservar' | 'trocar' | 'devolver' | 'solicitar' | 'suspender' | 'liberar';
+export type ActionType = 'reservar' | 'trocar' | 'devolver' | 'solicitar' | 'suspender' | 'liberar' | 'suspenso';
 
 // User roles
 export type UserRole = 'admin' | 'student';
@@ -29,35 +30,28 @@ export interface BaseAction {
 // Specific action request interfaces
 export interface ReservarActionRequest {
   IDClassroomFK: number;
-  Notes?: string;
 }
 
 export interface TrocarActionRequest {
-  IDClassroomFK: number;
-  TargetUserID: number; // ID do usuário que receberá a chave
-  Notes?: string;
+    IDClassroomFK: number
 }
 
 export interface DevolverActionRequest {
-  IDClassroomFK: number;
-  Notes?: string;
+  IDClassroomFK: number
 }
 
 export interface SolicitarActionRequest {
   IDClassroomFK: number;
-  TargetUserID: number; // ID do usuário para quem a chave será solicitada
-  Notes?: string;
 }
 
 export interface SuspenderActionRequest {
   IDClassroomFK: number;
-  Reason: string; // Motivo da suspensão
-  Notes?: string;
+  Reason: string;
 }
 
 export interface LiberarActionRequest {
   IDClassroomFK: number;
-  Notes?: string;
+  Reason: string;
 }
 
 // Union type for all action requests
@@ -127,6 +121,7 @@ export interface PermissionCheck {
   canSolicitar: boolean;
   canSuspender: boolean;
   canLiberar: boolean;
+  canSuspenso: boolean;
 }
 
 // State transition rules
@@ -139,22 +134,19 @@ export interface StateTransitionRule {
 
 // Action result interface
 export interface ActionResult {
-  success: boolean;
-  actionID?: number;
-  classroomState?: ClassroomState;
-  message: string;
-  historyRecord?: {
-    IDHistory: number;
-    StartDate: Date;
-    ReturnDate?: Date;
-    IDUserFK: number;
-    IDClassroomFK: number;
-  };
-  notification?: {
-    IDNotification: number;
-    Message: string;
-    IDUserFK: number;
-  };
+    success: boolean
+    actionID?: number
+    classroomState?: ClassroomState
+    message: string
+    history?: {
+        IDUserFK: number,
+        IDClassroomFK: number,
+    }
+    notification?: {
+        IDNotification: number
+        Message: string
+        IDUserFK: number
+    }
 }
 
 // Error types for actions
@@ -213,7 +205,7 @@ export interface ActionNotification {
 }
 
 // Constants
-export const ACTION_TYPES: ActionType[] = ['reservar', 'trocar', 'devolver', 'solicitar', 'suspender', 'liberar'];
+export const ACTION_TYPES: ActionType[] = ['reservar', 'trocar', 'devolver', 'solicitar', 'suspender', 'liberar', 'suspenso'];
 
 export const USER_ROLES: UserRole[] = ['admin', 'student'];
 
@@ -223,29 +215,27 @@ export const CLASSROOM_STATES: ClassroomState[] = ['Disponivel', 'Em uso', 'Indi
 
 // State transition matrix
 export const STATE_TRANSITIONS: StateTransitionRule[] = [
-  // Reservar: Disponivel -> Em uso (student only)
+  // Reservar: Disponivel -> Em uso (student only) - aluno pede chave da secretaria
   { from: 'Disponivel', to: 'Em uso', action: 'reservar', allowedRoles: ['student'] },
   
-  // Trocar: Em uso -> Em uso (student only, transfer to another student)
+  // Trocar: Em uso -> Em uso (student only) - aluno troca chave com outro aluno
   { from: 'Em uso', to: 'Em uso', action: 'trocar', allowedRoles: ['student'] },
   
-  // Devolver: Em uso -> Disponivel (student only)
+  // Devolver: Em uso -> Disponivel (student only) - aluno devolve chave para secretaria
   { from: 'Em uso', to: 'Disponivel', action: 'devolver', allowedRoles: ['student'] },
   
-  // Solicitar: Disponivel -> Em uso (admin only, assign to student)
-  { from: 'Disponivel', to: 'Em uso', action: 'solicitar', allowedRoles: ['admin'] },
+  // Solicitar: Em uso -> Disponivel (admin only) - admin pede chave do usuário (obrigatório)
+  { from: 'Em uso', to: 'Disponivel', action: 'solicitar', allowedRoles: ['admin'] },
   
-  // Suspender: any state -> Indisponivel (admin only)
+  // Suspender: Disponivel -> Indisponivel (admin only) - admin suspende sala (só se estiver disponível)
   { from: 'Disponivel', to: 'Indisponivel', action: 'suspender', allowedRoles: ['admin'] },
-  { from: 'Em uso', to: 'Indisponivel', action: 'suspender', allowedRoles: ['admin'] },
-  { from: 'Indisponivel', to: 'Indisponivel', action: 'suspender', allowedRoles: ['admin'] },
   
-  // Liberar: Indisponivel -> Disponivel (admin only)
+  // Liberar: Indisponivel -> Disponivel (admin only) - admin libera sala suspensa
   { from: 'Indisponivel', to: 'Disponivel', action: 'liberar', allowedRoles: ['admin'] },
 ];
 
 // Permission matrix
 export const PERMISSIONS: Record<UserRole, ActionType[]> = {
-  student: ['reservar', 'trocar', 'devolver'],
+  student: ['reservar', 'trocar', 'devolver', 'suspenso'],
   admin: ['solicitar', 'suspender', 'liberar']
 };

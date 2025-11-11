@@ -11,7 +11,7 @@ export class HistoryService {
       const newHistory = await prisma.history.create({
         data: {
           ...historyData,
-          StartDate: new Date(),
+          StartDate: historyData.StartDate || new Date(),
         },
         include: {
           User: true,
@@ -19,7 +19,7 @@ export class HistoryService {
         },
       });
       return newHistory;
-    } catch (error) {
+    } catch (Error) {
       throw new AppError(ErrorCode.DATABASE_ERROR, 'Failed to create history', 500);
     }
   }

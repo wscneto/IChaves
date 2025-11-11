@@ -7,6 +7,7 @@ export interface HistoryWithRelations extends History {
 
 export type CreateHistoryData = Omit<History, 'IDHistory' | 'StartDate' | 'ReturnDate'> & {
   ReturnDate?: Date | null;
+  StartDate?: Date;
 };
 
 export type UpdateHistoryData = Partial<CreateHistoryData>;
@@ -21,6 +22,6 @@ export interface HistoryQueryParams {
   return_date_from?: string;
   return_date_to?: string;
   is_active?: boolean;
-  sort_by?: 'StartDate' | 'ReturnDate';
-  sort_order?: 'asc' | 'desc';
+  sort_by?: string;
+  sort_order?: string;
 }
