@@ -1,13 +1,16 @@
-import { Request } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
+import 'express';
 
-/**
- * Extend Express Request interface to include user property
- */
 declare global {
   namespace Express {
+    // Ajuste os campos conforme seu payload de auth/JWT
+    interface UserPayload {
+      id: number | string;
+      email?: string;
+      role?: string;
+    }
+
     interface Request {
-      user?: string | JwtPayload ;
+      user?: UserPayload;
     }
   }
 }

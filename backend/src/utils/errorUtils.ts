@@ -12,6 +12,22 @@ import {
   ErrorCode,
   ErrorDetails 
 } from '../types/errors';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+// User interface for authentication
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'student' | null;
+}
+
+// Extended Request interface
+export interface AuthenticatedRequest extends Request {
+  user?: User;
+}
 
 /**
  * Utility functions for throwing errors with consistent format
@@ -101,7 +117,7 @@ export class ValidationUtils {
   /**
    * Validate required field
    */
-  static validateRequired(value: any, fieldName: string, req?: Request): void {
+  static validateRequired(value: unknown, fieldName: string, req?: Request): void {
     if (value === undefined || value === null || value === '') {
       ErrorUtils.throwValidationError(
         `${fieldName} is required`,
@@ -162,7 +178,7 @@ export class ValidationUtils {
   /**
    * Validate array length
    */
-  static validateArrayLength(value: any[], fieldName: string, min: number, max: number, req?: Request): void {
+  static validateArrayLength(value: unknown[], fieldName: string, min: number, max: number, req?: Request): void {
     if (value.length < min) {
       ErrorUtils.throwValidationError(
         `${fieldName} must contain at least ${min} items`,
@@ -177,6 +193,224 @@ export class ValidationUtils {
         { field: fieldName, value: value.length, expected: `maximum ${max} items` },
         req
       );
+    }
+  }
+
+  /**
+   * Validate classroom capacity (positive number)
+   */
+  static validateCapacity(capacity: number, req?: Request): void {
+    if (!Number.isInteger(capacity) || capacity <= 0) {
+      ErrorUtils.throwValidationError(
+        'Capacity must be a positive integer',
+        { field: 'Capacity', value: capacity, expected: 'positive integer' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate classroom state
+   */
+  static validateState(state: string, req?: Request): void {
+    const validStates = ['Disponivel', 'Em uso', 'Indisponivel'];
+    if (!validStates.includes(state)) {
+      ErrorUtils.throwValidationError(
+        `State must be one of: ${validStates.join(', ')}`,
+        { field: 'State', value: state, expected: validStates },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate if user exists
+   */
+  static async validateUserExists(userId: number, req?: Request): Promise<void> {
+    const user = await prisma.user.findUnique({ where: { IDUser: userId } });
+    if (!user) {
+      ErrorUtils.throwNotFoundError('User not found', req);
+    }
+  }
+
+  /**
+   * Validate if classroom exists
+   */
+  static async validateClassroomExists(classroomId: number, req?: Request): Promise<void> {
+    const classroom = await prisma.classroom.findUnique({ where: { IDClassroom: classroomId } });
+    if (!classroom) {
+      ErrorUtils.throwNotFoundError('Classroom not found', req);
+    }
+  }
+
+  /**
+   * Validate date format (ISO 8601)
+   */
+  static validateDate(date: string, fieldName: string, req?: Request): void {
+    const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+    if (!iso8601Regex.test(date)) {
+      ErrorUtils.throwValidationError(
+        `Invalid date format for ${fieldName}. Expected ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)`,
+        { field: fieldName, value: date, expected: 'ISO 8601 format' },
+   * Validate action type
+   */
+  static validateActionType(actionType: string, req?: Request): void {
+    const validActions = ['reservar', 'trocar', 'devolver', 'solicitar', 'suspender', 'liberar'];
+    if (!validActions.includes(actionType)) {
+      ErrorUtils.throwValidationError(
+        `Action type must be one of: ${validActions.join(', ')}`,
+        { field: 'ActionType', value: actionType, expected: validActions },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate user role
+   */
+  static validateUserRole(role: string, req?: Request): void {
+    const validRoles = ['admin', 'student'];
+    if (!validRoles.includes(role)) {
+      ErrorUtils.throwValidationError(
+        `User role must be one of: ${validRoles.join(', ')}`,
+        { field: 'Role', value: role, expected: validRoles },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate classroom ID
+   */
+  static validateClassroomID(classroomID: number, req?: Request): void {
+    if (!Number.isInteger(classroomID) || classroomID <= 0) {
+      ErrorUtils.throwValidationError(
+        'Classroom ID must be a positive integer',
+        { field: 'IDClassroomFK', value: classroomID, expected: 'positive integer' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate user ID
+   */
+  static validateUserID(userID: number, req?: Request): void {
+    if (!Number.isInteger(userID) || userID <= 0) {
+      ErrorUtils.throwValidationError(
+        'User ID must be a positive integer',
+        { field: 'UserID', value: userID, expected: 'positive integer' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate target user ID for transfer actions
+   */
+  static validateTargetUserID(targetUserID: number, req?: Request): void {
+    if (!Number.isInteger(targetUserID) || targetUserID <= 0) {
+      ErrorUtils.throwValidationError(
+        'Target user ID must be a positive integer',
+        { field: 'TargetUserID', value: targetUserID, expected: 'positive integer' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate date range (end date > start date)
+   */
+  static validateDateRange(startDate: string, endDate: string, req?: Request): void {
+    if (new Date(endDate) <= new Date(startDate)) {
+      ErrorUtils.throwValidationError(
+        'End date must be after start date',
+        { 
+          field: 'ReturnDate', 
+          value: endDate, 
+          expected: `> ${startDate}` 
+        },
+        req
+      );
+    }
+   * Validate suspension reason
+   */
+  static validateSuspensionReason(reason: string, req?: Request): void {
+    if (!reason || typeof reason !== 'string') {
+      ErrorUtils.throwValidationError(
+        'Suspension reason is required',
+        { field: 'Reason', value: reason, expected: 'non-empty string' },
+        req
+      );
+    }
+    
+    if (reason.length < 5) {
+      ErrorUtils.throwValidationError(
+        'Suspension reason must be at least 5 characters long',
+        { field: 'Reason', value: reason, expected: 'minimum 5 characters' },
+        req
+      );
+    }
+    
+    if (reason.length > 200) {
+      ErrorUtils.throwValidationError(
+        'Suspension reason must be no more than 200 characters long',
+        { field: 'Reason', value: reason, expected: 'maximum 200 characters' },
+        req
+      );
+    }
+  }
+
+  /**
+   * Validate notes field
+   */
+  static validateNotes(notes: string | undefined, fieldName: string = 'Notes', req?: Request): void {
+    if (notes !== undefined) {
+      if (typeof notes !== 'string') {
+        ErrorUtils.throwValidationError(
+          `${fieldName} must be a string`,
+          { field: fieldName, value: notes, expected: 'string' },
+          req
+        );
+      }
+      
+      if (notes.length > 500) {
+        ErrorUtils.throwValidationError(
+          `${fieldName} must be no more than 500 characters long`,
+          { field: fieldName, value: notes, expected: 'maximum 500 characters' },
+          req
+        );
+      }
+    }
+  }
+
+  /**
+   * Validate action request data based on action type
+   */
+  static validateActionRequest(actionType: string, data: Record<string, unknown>, req?: Request): void {
+    this.validateActionType(actionType, req);
+    
+    // Common validations
+    if (typeof data.IDClassroomFK === 'number') {
+      this.validateClassroomID(data.IDClassroomFK, req);
+    }
+    if (typeof data.Notes === 'string' || data.Notes === undefined) {
+      this.validateNotes(data.Notes, 'Notes', req);
+    }
+    
+    // Action-specific validations
+    switch (actionType) {
+      case 'trocar':
+      case 'solicitar':
+        if (typeof data.TargetUserID === 'number') {
+          this.validateTargetUserID(data.TargetUserID, req);
+        }
+        break;
+      case 'suspender':
+        if (typeof data.Reason === 'string') {
+          this.validateSuspensionReason(data.Reason, req);
+        }
+        break;
     }
   }
 }
@@ -237,8 +471,8 @@ export class AuthUtils {
   /**
    * Check if user is authenticated
    */
-  static requireAuth(req: Request): void {
-    if (!(req as Request).user) {
+  static requireAuth(req: AuthenticatedRequest): void {
+    if (!req.user) {
       ErrorUtils.throwAuthError('Authentication required', req);
     }
   }
@@ -246,10 +480,10 @@ export class AuthUtils {
   /**
    * Check if user has specific role
    */
-  static requireRole(role: string, req: Request): void {
+  static requireRole(role: string, req: AuthenticatedRequest): void {
     this.requireAuth(req);
     
-    if (!(req as Request).user?.role?.includes(role)) {
+    if (!req.user?.role?.includes(role)) {
       ErrorUtils.throwForbiddenError(`Role '${role}' required`, req);
     }
   }
@@ -257,7 +491,7 @@ export class AuthUtils {
   /**
    * Check if user owns resource
    */
-  static requireOwnership(userId: string, resourceUserId: string, req: Request): void {
+  static requireOwnership(userId: string, resourceUserId: string, req: AuthenticatedRequest): void {
     this.requireAuth(req);
     
     if (userId !== resourceUserId) {

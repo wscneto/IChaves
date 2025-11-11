@@ -83,11 +83,11 @@ async function main() {
       Student: {
         upsert: {
           create: {
-            Course: 'Engenharia de Software',
+            Course: 'Engenharia da Computação',
             Period: '5',
           },
           update: {
-            Course: 'Engenharia de Software',
+            Course: 'Engenharia da Computação',
             Period: '5',
           },
         },
@@ -98,7 +98,7 @@ async function main() {
       Email: 'joao@example.com',
       Student: {
         create: {
-          Course: 'Engenharia de Software',
+          Course: 'Engenharia da Computação',
           Period: '5',
         },
       },
