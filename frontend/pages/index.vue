@@ -9,7 +9,7 @@
         v-else
         v-model="searchQuery"
         type="text"
-        placeholder="Busque uma sala..."
+        placeholder="Busque uma chave..."
         class="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none font-funnel-sans"
       />
     </div>
@@ -50,7 +50,7 @@
         class="text-center py-12"
       >
         <div class="text-gray-500 text-lg font-funnel-sans">
-          Nenhuma sala encontrada
+          Nenhuma chave encontrada
         </div>
         <div class="text-gray-400 text-sm mt-2">Tente ajustar sua busca</div>
       </div>
@@ -92,12 +92,12 @@ import { api } from "@/services/api";
 import { useClassroomsStore } from "@/stores/classrooms";
 
 useHead({
-  title: "IChaves - Gestão de Salas de Aula",
+  title: "IChaves - Gestão de Chaves",
   meta: [
     {
       name: "description",
       content:
-        "Encontre e gerencie salas de aula no Instituto de Computação da UFAL. Veja a disponibilidade, reserve e acompanhe o histórico de uso.",
+        "Encontre e gerencie chaves no Instituto de Computação da UFAL. Veja a disponibilidade, reserve e acompanhe o histórico de uso.",
     },
   ],
 });
@@ -119,7 +119,7 @@ const inputPlaceholder = ref("");
 let onConfirmAction: ((value?: string) => void) | null = null;
 
 // Classrooms data
-const actionLoading = ref<number | null>(null); // ID da sala que está sendo processada
+const actionLoading = ref<number | null>(null); // ID da chave que está sendo processada
 
 const filteredClassrooms = computed(() =>
   classroomsStore.classrooms
@@ -206,7 +206,7 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
               "Sua solicitação de reserva foi enviada! Aguarde a aprovação do administrador."
             );
           } catch (error) {
-            console.error("Erro ao reservar sala:", error);
+            console.error("Erro ao reservar chave:", error);
             showInfoPopup(
               "Erro",
               "Ocorreu um erro ao solicitar a reserva. Por favor, tente novamente."
@@ -235,7 +235,7 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
               "Sua solicitação de troca foi enviada! Aguarde a resposta do usuário que tem a chave."
             );
           } catch (error) {
-            console.error("Erro ao trocar sala:", error);
+            console.error("Erro ao trocar chave:", error);
             showInfoPopup(
               "Erro",
               "Ocorreu um erro ao solicitar a troca. Por favor, tente novamente."
@@ -264,7 +264,7 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
               "Sua solicitação de devolução foi enviada! Aguarde a confirmação do administrador."
             );
           } catch (error) {
-            console.error("Erro ao devolver sala:", error);
+            console.error("Erro ao devolver chave:", error);
             showInfoPopup(
               "Erro",
               "Ocorreu um erro ao solicitar a devolução. Por favor, tente novamente."
@@ -293,10 +293,10 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
               "Sua solicitação de chave foi enviada! Aguarde a resposta do aluno."
             );
           } catch (error) {
-            console.error("Erro ao solicitar sala:", error);
+            console.error("Erro ao solicitar chave:", error);
             showInfoPopup(
               "Erro",
-              "Ocorreu um erro ao solicitar a sala. Por favor, tente novamente."
+              "Ocorreu um erro ao solicitar a chave. Por favor, tente novamente."
             );
           } finally {
             actionLoading.value = null;
@@ -309,22 +309,22 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
       openConfirmPopup(
         classroom.Name,
         classroom.Description,
-        `Você tem certeza que deseja suspender a sala <strong>${classroom.Name}</strong>?`,
+        `Você tem certeza que deseja suspender a chave <strong>${classroom.Name}</strong>?`,
         async (reason) => {
           try {
             actionLoading.value = classroom.IDClassroom;
-            // Usar a API real para suspender a sala
+            // Usar a API real para suspender a chave
             await suspendClassroom(
               classroom.IDClassroom,
               reason || "Suspensão administrativa"
             );
             await classroomsStore.fetchClassrooms(); // ATUALIZA O ESTADO
-            showInfoPopup("Sucesso", "A sala foi suspensa com sucesso!");
+            showInfoPopup("Sucesso", "A chave foi suspensa com sucesso!");
           } catch (error) {
-            console.error("Erro ao suspender sala:", error);
+            console.error("Erro ao suspender chave:", error);
             showInfoPopup(
               "Erro",
-              "Ocorreu um erro ao suspender a sala. Por favor, tente novamente."
+              "Ocorreu um erro ao suspender a chave. Por favor, tente novamente."
             );
           } finally {
             actionLoading.value = null;
@@ -341,22 +341,22 @@ const handleClassroomAction = async (action: string, classroom: Classroom) => {
       openConfirmPopup(
         classroom.Name,
         classroom.Description,
-        `Você tem certeza que deseja liberar a sala <strong>${classroom.Name}</strong>?`,
+        `Você tem certeza que deseja liberar a chave <strong>${classroom.Name}</strong>?`,
         async (reason) => {
           try {
             actionLoading.value = classroom.IDClassroom;
-            // Usar a API real para liberar a sala
+            // Usar a API real para liberar a chave
             await releaseClassroom(
               classroom.IDClassroom,
               reason || "Liberação administrativa"
             );
             await classroomsStore.fetchClassrooms(); // ATUALIZA O ESTADO
-            showInfoPopup("Sucesso", "A sala foi liberada com sucesso!");
+            showInfoPopup("Sucesso", "A chave foi liberada com sucesso!");
           } catch (error) {
-            console.error("Erro ao liberar sala:", error);
+            console.error("Erro ao liberar chave:", error);
             showInfoPopup(
               "Erro",
-              "Ocorreu um erro ao liberar a sala. Por favor, tente novamente."
+              "Ocorreu um erro ao liberar a chave. Por favor, tente novamente."
             );
           } finally {
             actionLoading.value = null;
